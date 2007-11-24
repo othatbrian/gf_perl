@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use GFProject;
+
+## Provide usage information
+die "Usage: $0 <project> <password>\n" unless $#ARGV == 1;
+
+## Connect to the project
+my $proj = GFProject->connect(@ARGV) or die;
+
+## Print some useful information about the duplicate UWI's
+for ($proj->getDuplicateUwis) {
+	print "$_ (", $proj->getUwiCreationDate($_), ")\n",
+	"    ", scalar $proj->getDeviationsByUwi($_), " deviation surveys\n",
+	"    ", scalar $proj->getCheckshotsByUwi($_), " checkshot surveys\n",
+	"    ", scalar $proj->getMarkersByUwi($_), " markers\n",
+	"    ", scalar $proj->getLogCurvesByUwi($_), " log curves\n"
+}

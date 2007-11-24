@@ -71,11 +71,24 @@ sub getDeviationsByUwi {
 	return @_
 }
 
+sub getLogCurvesByUwi {
+	my $self = shift;
+	my $sql = "select l.id from log_curve l, borehole b where l.borehole_id = b.id and b.uwi = ?";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {}, shift)};
+	return @_
+}
+
 sub getMarkersByUwi {
 	my $self = shift;
 	my $sql = "select distinct e.entity_id from e_to_rr e, borehole b where e.implementation_table in ('Biostrat_Marker','Chronostrat_Marker','Fault_Marker','Fluid_Marker','SedMarker','Strat_Marker','Struct_Marker','Struct_XSect_Marker','Well_Marker') and e.entity_table = 'Borehole' and e.property_order = 0 and e.entity_id = b.id and b.uwi = ?";
 	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {}, shift)};
 	return @_
+}
+
+sub getUwiCreationDate {
+	my $self = shift;
+	my $sql = "select create_date from borehole where uwi = ?";
+	return $_dbh->selectrow_arrayref($sql, {}, shift)->[0]
 }
 
 ##
