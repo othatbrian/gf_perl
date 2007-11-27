@@ -81,7 +81,7 @@ sub getSpudDate {
 	my $self = shift;
 	return $self->{"spud_date"} if exists $self->{"spud_date"};
 	$self->{"string"} =~ /^DA.{68}(.{8})/m;
-	($self->{"spud_date"} = $1) =~ s/\s+//;
+	($self->{"spud_date"} = $1) =~ s/\s+// if $1;
 	return $self->{"spud_date"}
 }
 
