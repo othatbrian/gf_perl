@@ -14,7 +14,8 @@ sub getDirectionalSurvey {
 	for (split "\n", $self->{"string"}) {
 		next unless /^U2...(.{5}).{8}(.{6})(.{6})/;
 		($md, $dev, $az) = ($1, $2, $3);
-		map {$_ =~ s/\s+//} $md, $dev, $az; 
+		map {$_ =~ s/\s+//} $md, $dev, $az;
+		$text .= $self->getUwi . ", 0, 0.00, 0.00\n" if ($text eq "" and $md != 0);
 		$text .= $self->getUwi . ", $md, $dev, $az\n"
 	}
 	return $text
