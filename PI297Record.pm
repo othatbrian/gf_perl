@@ -1,14 +1,25 @@
-package PIDwights::297Format;
+package PI297Record;
 
 use strict;
 use warnings;
 
-use PIDwights;
-@PIDwights::297Format::ISA = ("PIDwights");
-
 ##
 ## Public instance methods
 ##
+sub getDirectionalSurvey {
+	my $self = shift;
+	return $self->{"directional_survey"} if exists $self->{"directional_survey"};
+	my $text = "";
+	my ($md, $dev, $az);
+	for (split "\n", $self->{"string"}) {
+		next unless /^U2...(.{5}).{8}(.{6})(.{6})/;
+		($md, $dev, $az) = ($1, $2, $3);
+		map {$_ =~ s/\s+//} $md, $dev, $az; 
+		$text .= $self->getUwi . ", $md, $dev, $az\n"
+	}
+	return $text
+}
+
 sub getElevation {
 	my $self = shift;
 	return $self->{"elevation"} if exists $self->{"elevation"};
@@ -96,6 +107,12 @@ sub getWellNumber {
 	$self->{"string"} =~ /^C.{42}(.{10})/m;
 	($self->{"well_number"} = $1) =~ s/\s+$//;
 	return $self->{"well_number"}
+}
+
+sub new {
+	my $caller = shift;
+	my $self = {"string" => shift};
+	bless $self, ref $caller || $caller
 }
 
 1

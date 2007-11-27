@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 
-use PIDwights::297Format;
+use PI297Record;
+use PI297File;
 use POSIX qw/strftime/;
 
 ## Provide for conversion between PIDwights' well status codes and GeoFrame's 
@@ -25,7 +26,7 @@ my %well_codes = (
 );
 
 ## Provide usage information
-die "Usage: $0 <input_file> <county_list_file>\n" unless $#ARGV >= 0;
+die "Usage: $0 <input_file> {<county_list_file>}\n" unless $#ARGV >= 0;
 
 ## Create a list of counties if provided
 my @counties;
@@ -40,55 +41,40 @@ if (defined $ARGV[1]) {
 }
 
 ## Process the file
-open INPUT, $ARGV[0] or die "Unable to open file \"$ARGV[0]\"!\n";
-my $record = "";
+my $input = PI297File->read($ARGV[0]);
 my $included = my $total = 0;
-my ($pidwights, $county, $date, $day, $month, $year);
-while (<INPUT>) {
-	## Remove any line endings
-	s/\r//;
-	chomp;
-	if (/^START_US_WELL\s+\d+$/) {
-		## START_US_WELL means we're starting a new record
-		$record = ""
-	} elsif (/^END_US_WELL\s+\d+$/) {
-		## END_US_WELL means we've collected a record, so process it
-		$total++;
-		$pidwights = PIDwights::297Format->new($record);
-		## Some entries seem to be missing location info; skip them
-		unless ($pidwights->getLongitude && $pidwights->getLatitude) {
-			print STDERR "Warning: discarding $pidwights->getUwi as it has no location information";
-			next
-		}
-		## Skip this record if it's not in a desired county
-		grep {substr($pidwights->getUwi, 2, 3) == $_} @counties or next if @counties;
-		## Convert the date to a GeoFrame friendly format
-		if ($pidwights->getSpudDate) {
-			$day = substr($pidwights->getSpudDate, 6, 2);
-			$month = substr($pidwights->getSpudDate, 4, 2);
-			$year = substr($pidwights->getSpudDate, 0, 4);
-			$date = POSIX::strftime("%d-%b-%Y", 0, 0, 0, $day, $month - 1, $year - 1900)
-		} else {
-			$date = ''
-		}
-		## Create the output
-		$included++;
-		print $pidwights->getUwi,
-			"\t", $pidwights->getWellName,
-			"\t", $pidwights->getLeaseName,
-			"\t", $pidwights->getWellNumber,
-			"\t", $pidwights->getLatitude,
-			"\t", $pidwights->getLongitude,
-			"\t", $pidwights->getOperator,
-			"\t", $date,
-			"\t", $pidwights->getElevation,
-			"\t", $pidwights->getMeasuredDepth,
-			"\t", $well_codes{$pidwights->getFinalWellClass}, "\n"
-	} else {
-		## Otherwise we're still collecting a record
-		$record .= "\n$_"
+my ($record, $county, $date, $day, $month, $year);
+while ($record = $input->nextRecord) {
+	$total++;
+	## Some entries seem to be missing location info; skip them
+	unless ($record->getLongitude && $record->getLatitude) {
+		print STDERR "Warning: discarding ", $record->getUwi, " as it has no location information\n";
+		next
 	}
+	## Skip this record if it's not in a desired county
+	grep {substr($record->getUwi, 2, 3) == $_} @counties or next if @counties;
+	## Convert the date to a GeoFrame friendly format
+	if ($record->getSpudDate) {
+		$day = substr($record->getSpudDate, 6, 2);
+		$month = substr($record->getSpudDate, 4, 2);
+		$year = substr($record->getSpudDate, 0, 4);
+		$date = POSIX::strftime("%d-%b-%Y", 0, 0, 0, $day, $month - 1, $year - 1900)
+	} else {
+		$date = ''
+	}
+	## Create the output
+	$included++;
+	print $record->getUwi,
+		"\t", $record->getWellName,
+		"\t", $record->getLeaseName,
+		"\t", $record->getWellNumber,
+		"\t", $record->getLatitude,
+		"\t", $record->getLongitude,
+		"\t", $record->getOperator,
+		"\t", $date,
+		"\t", $record->getElevation,
+		"\t", $record->getMeasuredDepth,
+		"\t", $well_codes{$record->getFinalWellClass}, "\n"
 }
 print STDERR "Processed $total wells\n";
 print STDERR "Included $included wells\n";
-close INPUT;
