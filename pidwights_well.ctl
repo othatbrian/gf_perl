@@ -1,13 +1,13 @@
-gal_GeneralInfo GenInfo_1306478401 (
+gal_GeneralInfo GenInfo_1580952834 (
     AbsentValue = "-999.25",
     Comment = "",
     RecordLength = 256,
-    StringDelimiter  = "\t",
+    StringDelimiter  = "|",
     StartRow = 1,
     GFVersionNumber = "3.5",
   );
 
-gal_CreateWellDI GFDataItem_1306478401 (
+gal_CreateWellDI GFDataItem_1580952834 (
     DIType = "Well",
     Attributes = {
         "UWI",
@@ -24,32 +24,32 @@ gal_CreateWellDI GFDataItem_1306478401 (
         " ",
     },
     Values = {
-        GFDataItem_1306478401.GetStrDataValue()[0],
-        GFDataItem_1306478401.GetStrDataValue()[1],
-        GFDataItem_1306478401.GetStrDataValue()[2],
-        GFDataItem_1306478401.GetStrDataValue()[6],
-        GFDataItem_1306478401.GetStrDataValue()[7],
+        GFDataItem_1580952834.GetStrDataValue()[0],
+        GFDataItem_1580952834.GetStrDataValue()[1],
+        GFDataItem_1580952834.GetStrDataValue()[2],
+        GFDataItem_1580952834.GetStrDataValue()[6],
+        GFDataItem_1580952834.GetStrDataValue()[7],
     },
     DataValues = {
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_Date(,,"\t","dd-MMM-yyyy H:M:S",),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%d"),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_Date(,,"|","dd-MMM-yyyy H:M:S",),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%d"),
     },
     ContinueTest = 1
 );
 
 
-gal_CreateDI GFDataItem_1306478401_Pos (
+gal_CreateDI GFDataItem_1580952834_Pos (
     DIType = "Position",
-    Container = GFDataItem_1306478401,
+    Container = GFDataItem_1580952834,
     Attributes = {
 	"Code",
 	"Storage_Coord1",
@@ -59,22 +59,22 @@ gal_CreateDI GFDataItem_1306478401_Pos (
 	"Measurement"
 	},
     DataValues = {
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_Date(,,"\t","dd-MMM-yyyy H:M:S",),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%d"),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_Date(,,"|","dd-MMM-yyyy H:M:S",),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%d"),
     },
    Values = {
 	"Surface_Location",
-	GFDataItem_1306478401.GetStrDataValue()[5],
-	GFDataItem_1306478401.GetStrDataValue()[4],
+	GFDataItem_1580952834.GetStrDataValue()[5],
+	GFDataItem_1580952834.GetStrDataValue()[4],
 	"deg",
 	"Surface_Location",
 	"GeographicalDistance"
@@ -89,9 +89,9 @@ gal_CreateDI GFDataItem_1306478401_Pos (
 );
 
 
-gal_CreateBoreholeDI GFDataItem_1306478401_BH (
+gal_CreateBoreholeDI GFDataItem_1580952834_BH (
     DIType = "Borehole",
-    Container = GFDataItem_1306478401,
+    Container = GFDataItem_1580952834,
     WorkingDatum = { "KB" },
     WellSymbolType = { "IESX" },
     Attributes = {
@@ -103,17 +103,17 @@ gal_CreateBoreholeDI GFDataItem_1306478401_BH (
         "Well_Symbol",
     },
     DataValues = {
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_String(,,"\t",),
-        gal_Date(,,"\t","dd-MMM-yyyy H:M:S",),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%g"),
-        gal_Number(,,"\t","%d"),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_String(,,"|",),
+        gal_Date(,,"|","dd-MMM-yyyy H:M:S",),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%g"),
+        gal_Number(,,"|","%d"),
     },
     Units = {
         " ",
@@ -124,12 +124,12 @@ gal_CreateBoreholeDI GFDataItem_1306478401_BH (
         " ",
     },
     Values = {
-        GFDataItem_1306478401.GetStrDataValue()[0],
-        GFDataItem_1306478401.GetStrDataValue()[1],
-        GFDataItem_1306478401.GetStrDataValue()[3],
-        GFDataItem_1306478401.GetNumDataValue()[8],
-        GFDataItem_1306478401.GetNumDataValue()[9],
-        GFDataItem_1306478401.GetNumDataValue()[10],
+        GFDataItem_1580952834.GetStrDataValue()[0],
+        GFDataItem_1580952834.GetStrDataValue()[1],
+        GFDataItem_1580952834.GetStrDataValue()[3],
+        GFDataItem_1580952834.GetNumDataValue()[8],
+        GFDataItem_1580952834.GetNumDataValue()[9],
+        GFDataItem_1580952834.GetNumDataValue()[10],
     },
 
 );

@@ -64,17 +64,7 @@ while ($record = $input->nextRecord) {
 	}
 	## Create the output
 	$included++;
-	print $record->getUwi,
-		"\t", $record->getWellName,
-		"\t", $record->getLeaseName,
-		"\t", $record->getWellNumber,
-		"\t", $record->getLatitude,
-		"\t", $record->getLongitude,
-		"\t", $record->getOperator,
-		"\t", $date,
-		"\t", $record->getElevation,
-		"\t", $record->getMeasuredDepth,
-		"\t", $well_codes{$record->getFinalWellClass}, "\n"
+	print join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}), "\n"
 }
 print STDERR "Processed $total wells\n";
 print STDERR "Included $included wells\n";
