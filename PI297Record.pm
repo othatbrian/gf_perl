@@ -3,6 +3,14 @@ package PI297Record;
 use strict;
 use warnings;
 
+use Math::Trig;
+
+use constant PI => 4*atan2(1,1);
+use constant FT_PER_M => 3.280840;
+use constant M_PER_SEC_LAT => 30.82;
+use constant MAJOR_AXIS => 6378206;
+use constant MINOR_AXIS => 6356583;
+
 ##
 ## Public instance methods
 ##
@@ -84,6 +92,21 @@ sub getSpudDate {
 	$self->{"string"} =~ /^DA.{68}(.{8})/m;
 	($self->{"spud_date"} = $1) =~ s/\s+// if $1;
 	return $self->{"spud_date"}
+}
+
+sub getTwoPointDirectionalSurvey {
+	my $self = shift;
+	return $self->{"two_point_directional_survey"} if exists $self->{"two_point_directional_survey"};
+	$self->{"string"} =~ /^DA(.{9})(.{10})/m;
+	my ($lat_bot, $long_bot) = ($1, $2);
+	my ($lat_top, $long_top) = ($self->getLatitude, $self->getLongitude);
+	map {s/\s+//} $lat_bot, $long_bot;
+	return "" unless ($lat_bot && $long_bot);
+	my $feet_per_deg_lat = M_PER_SEC_LAT*3600*FT_PER_M;
+	my $feet_per_deg_long = FT_PER_M*PI/180*(cos($lat_top*PI/180))*(sqrt(((MAJOR_AXIS**4)*(cos($lat_top*PI/180)**2)+(MINOR_AXIS**4)*(sin($lat_top*PI/180)**2))/(((MAJOR_AXIS*(cos($lat_top*PI/180)))**2)+((MINOR_AXIS*(sin($lat_top*PI/180)))**2))));
+	my $text = $self->getUwi . ", 0, 0.00, 0.00\n";
+	$text .= join ", ", $self->getUwi, $self->getMeasuredDepth, ($long_bot-$long_top)*$feet_per_deg_long, ($lat_bot-$lat_top)*$feet_per_deg_lat;
+	return $text . "\n"
 }
 
 sub getUwi {

@@ -6,7 +6,7 @@ use warnings;
 use PI297File;
 
 ## Provide usage information
-die "Usage: $0 <input_file>\n" unless $#ARGV == 0;
+die "Usage: $0 <input_file> <deviations_output> <2_points_output>\n" unless $#ARGV == 2;
 
 ## Gather a list of UWI's on stdin
 my @uwis;
@@ -15,8 +15,16 @@ while (<STDIN>) { chomp && push @uwis, $_ }
 ## Open the PIDwight's 297 format file
 my $input = PI297File->read($ARGV[0]);
 
+## Open output files
+open DEVS, ">$ARGV[1]" or die "Can't open \"$ARGV[1]\"\n";
+open TWOS, ">$ARGV[2]" or die "Can't open \"$ARGV[2]\"\n";
+
 ## Print any directional surveys for requested UWI's
 while (my $record = $input->nextRecord) {
 	grep {$record->getUwi == $_} @uwis or next;
-	print $record->getDirectionalSurvey
+	if ($record->getDirectionalSurvey) {
+		print DEVS $record->getDirectionalSurvey
+	} elsif ($record->getTwoPointDirectionalSurvey) {
+		print TWOS $record->getTwoPointDirectionalSurvey
+	}
 }
