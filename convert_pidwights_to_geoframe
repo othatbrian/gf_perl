@@ -26,19 +26,7 @@ my %well_codes = (
 );
 
 ## Provide usage information
-die "Usage: $0 <input_file> {<county_list_file>}\n" unless $#ARGV >= 0;
-
-## Create a list of counties if provided
-my @counties;
-if (defined $ARGV[1]) {
-	open COUNTIES, $ARGV[1] or die "Can't open file $ARGV[1]!\n";
-	while (<COUNTIES>) {
-		s/\r//;
-		chomp;
-		push @counties, $_
-	}
-	close COUNTIES
-}
+die "Usage: $0 <input_file>\n" unless $#ARGV == 0;
 
 ## Process the file
 my $input = PI297File->read($ARGV[0]);
@@ -51,8 +39,6 @@ while ($record = $input->nextRecord) {
 		print STDERR "Warning: discarding ", $record->getUwi, " as it has no location information\n";
 		next
 	}
-	## Skip this record if it's not in a desired county
-	grep {substr($record->getUwi, 2, 3) == $_} @counties or next if @counties;
 	## Convert the date to a GeoFrame friendly format
 	if ($record->getSpudDate) {
 		$day = substr($record->getSpudDate, 6, 2);
