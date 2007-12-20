@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use GFProject;
 use PI297Record;
 use PI297File;
 use POSIX qw/strftime/;
@@ -26,14 +27,30 @@ my %well_codes = (
 );
 
 ## Provide usage information
-die "Usage: $0 <input_file>\n" unless $#ARGV == 0;
+die "Usage: $0 <project> <password> <pid_well_file>\n" unless $#ARGV == 2;
+
+## Connect to the project
+my $proj = GFProject->connect(@ARGV[0,1]) or die;
+
+## Get a list of all UWI's currently in the project
+my %uwis_in_project;
+map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
 
 ## Process the file
-my $input = PI297File->read($ARGV[0]);
+my $input = PI297File->read($ARGV[2]);
 my $included = my $total = 0;
 my ($record, $county, $date, $day, $month, $year);
 while ($record = $input->nextRecord) {
 	$total++;
+	## If this UWI already exists in the project
+	## or if a comparable 12 digit UWI already exists in the project
+	## or if a comparable 10 digit UWI already exists in the project
+	## skip it
+	next if (
+		$uwis_in_project{$record->getUwi} or
+		$uwis_in_project{substr($record->getUwi, 0, 12)} or
+		$uwis_in_project{substr($record->getUwi, 0, 10)});
+	
 	## Some entries seem to be missing location info; skip them
 	unless ($record->getLongitude && $record->getLatitude) {
 		print STDERR "Warning: discarding ", $record->getUwi, " as it has no location information\n";
