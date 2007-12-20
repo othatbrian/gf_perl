@@ -39,7 +39,7 @@ map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
 ## Process the file
 my $input = PI297File->read($ARGV[2]);
 my $included = my $total = 0;
-my ($record, $county, $date, $day, $month, $year);
+my ($record, $date, $day, $month, $year);
 while ($record = $input->nextRecord) {
 	$total++;
 	## If this UWI already exists in the project
