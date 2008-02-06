@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use VelDatFile;
+
+## Provide usage information
+die "Usage: $0 <velocity_survey_csv_file>\n" unless $#ARGV == 0;
+
+## Gather a list of UWI's on stdin
+my %uwis;
+while (<STDIN>) { chomp; $uwis{$_} = 1 }
+
+## Open the Velocity Data file
+my $input = VelDatFile->read($ARGV[0]);
+
+## Print any checkshots for requested UWI's
+while (my $record = $input->nextRecord) {
+	$uwis{$record->getUwi} or next;
+	print $record->getCheckshot
+}
