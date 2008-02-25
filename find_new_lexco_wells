@@ -1,0 +1,93 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use GFProject;
+use LexcoRecord;
+use LexcoFile;
+use POSIX qw/strftime/;
+
+## Provide for conversion between Lexco's well status codes and GeoFrame's 
+my %well_codes = (
+	"COM" => 1,
+	"DRL" => 1,
+	"GS" => 17,
+	"OGS" => 17,
+	"OS" => 17,
+	"CNL" => 26,
+	"DRY" => 26,
+	"GX" => 26,
+	"OGX" => 26,
+	"OX" => 26,
+	"GP" => 30,
+	"OP" => 48,
+	"OGP" => 50
+);
+
+## Provide usage information
+die "Usage: $0 <project> <password> <block_list_file> <lexco_well_file>\n" unless $#ARGV == 3;
+
+## Connect to the project
+my $proj = GFProject->connect(@ARGV[0,1]) or die;
+
+## Get a list of all UWI's currently in the project
+my %uwis_in_project;
+map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
+
+## Create a list of blocks to include
+my %blocks;
+open (BLOCKS, $ARGV[2]) or die "Cannot open file $ARGV[2]\n";
+while(<BLOCKS>) {
+	chomp;
+	if ($_ =~ /\r/) {
+		for (split /\r/) {
+			$_ =~ /^([^_]+)_0*([^_]+)/;
+			$blocks{join("_", $1, $2)} = ""
+		}
+	} else {
+		$_ =~ /^([^_]+)_0*([^_]+)/;
+		$blocks{join("_", $1, $2)} = ""
+	}
+}
+
+## Process the file
+my $input = LexcoFile->read($ARGV[3]);
+my $included = my $total = 0;
+my ($record, $date, $day, $month, $year);
+while ($record = $input->nextRecord) {
+	$total++;
+	## If this UWI already exists in the project
+	## or if a comparable 12 digit UWI already exists in the project
+	## or if a comparable 10 digit UWI already exists in the project
+	## skip it
+	next if (
+		$uwis_in_project{$record->getUwi} or
+		$uwis_in_project{substr($record->getUwi, 0, 12)} or
+		$uwis_in_project{substr($record->getUwi, 0, 10)});
+		
+	## If we have a bogus (or no) latitude or longitude, skip it
+	if (! $record->getLongitude || ! $record->getLatitude || $record->getLongitude =~ /^\D+$/ || $record->getLatitude =~ /^\D+$/) {
+		print STDERR "Warning: discarding bogus record (uwi \"", $record->getUwi, "\")\n";
+		next
+	}
+	
+	## If it's not in a block we want, skip it
+	$record->getWellName =~ /([^_]+_[^_]+)_/;
+	next unless exists $blocks{$1};
+	
+	## Convert the date to a GeoFrame friendly format
+	if ($record->getSpudDate) {
+		m|(\d+)/(\d+)/(\d+)|;
+		($month, $day, $year) = ($1, $2, $3);
+		$date = POSIX::strftime("%d-%b-%Y", 0, 0, 0, $day, $month - 1, $year - 1900)
+	} else {
+		$date = ''
+	}
+	
+	## Create the output
+	$included++;
+	print join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}), "\n"
+}
+print STDERR "Processed $total wells\n";
+print STDERR "Included $included wells\n";

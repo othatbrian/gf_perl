@@ -1,4 +1,4 @@
-package PI297Record;
+package LexcoRecord;
 
 use strict;
 use warnings;
@@ -14,94 +14,95 @@ use constant MINOR_AXIS => 6356583;
 ##
 ## Public instance methods
 ##
-sub getDirectionalSurvey {
+sub getBottomLatitude {
 	my $self = shift;
-	return $self->{"directional_survey"} if exists $self->{"directional_survey"};
-	my $text = "";
-	my ($md, $dev, $az);
-	for (split "\n", $self->{"string"}) {
-		next unless /^U2...(.{5}).{8}(.{6})(.{6})/;
-		($md, $dev, $az) = ($1, $2, $3);
-		map {$_ =~ s/\s+//} $md, $dev, $az;
-		$text .= $self->getUwi . ", 0, 0, 0\n" if ($text eq "" and $md != 0);
-		$text .= $self->getUwi . ", $md, $dev, $az\n"
-	}
-	return $text
+	return $self->{"bottom_latitude"} if exists $self->{"bottom_latitude"};
+	$self->{"bottom_latitude"} = substr($self->{"string"}, 302, 10);
+	$self->{"bottom_latitude"} =~ s/^\s+//;
+	return $self->{"bottom_latitude"}
+}
+
+sub getBottomLongitude {
+	my $self = shift;
+	return $self->{"bottom_longitude"} if exists $self->{"bottom_longitude"};
+	$self->{"bottom_longitude"} = substr($self->{"string"}, 291, 10);
+	$self->{"bottom_longitude"} =~ s/^\s+//;
+	return $self->{"bottom_longitude"}
 }
 
 sub getElevation {
 	my $self = shift;
 	return $self->{"elevation"} if exists $self->{"elevation"};
-	$self->{"string"} =~ /^A.{57}(.{5})/m;
-	($self->{"elevation"} = $1) =~ s/\s+//;
+	$self->{"elevation"} = substr($self->{"string"}, 102, 10);
+	$self->{"elevation"} =~ s/^\s+//;
 	return $self->{"elevation"}
 }
 
 sub getFinalWellClass {
 	my $self = shift;
 	return $self->{"final_well_class"} if exists $self->{"final_well_class"};
-	$self->{"string"} =~ /^A.{50}(.)/m;
-	$self->{"final_well_class"} = $1;
+	$self->{"final_well_class"} = substr($self->{"string"}, 313, 3);
+	$self->{"final_well_class"} =~ s/\s+$//;
 	return $self->{"final_well_class"}
 }
 
 sub getLatitude {
 	my $self = shift;
 	return $self->{"latitude"} if exists $self->{"latitude"};
-	$self->{"string"} =~ /^A.{14}(.{9})/m;
-	($self->{"latitude"} = $1) =~ s/\s+//;
+	$self->{"latitude"} = substr($self->{"string"}, 280, 10);
+	$self->{"latitude"} =~ s/^\s+//;
 	return $self->{"latitude"}
 }
 
 sub getLeaseName {
 	my $self = shift;
 	return $self->{"lease_name"} if exists $self->{"lease_name"};
-	$self->{"string"} =~ /^C.{23}(.{19})/m;
-	($self->{"lease_name"} = $1) =~ s/\s+$//;
+	$self->{"lease_name"} = substr($self->{"string"}, 26, 7);
+	$self->{"lease_name"} =~ s/\s+//;
 	return $self->{"lease_name"}
 }
 
 sub getLongitude {
 	my $self = shift;
 	return $self->{"longitude"} if exists $self->{"longitude"};
-	$self->{"string"} =~ /^A.{23}(.{10})/m;
-	($self->{"longitude"} = $1) =~ s/\s+//;
+	$self->{"longitude"} = substr($self->{"string"}, 269, 10);
+	$self->{"longitude"} =~ s/^\s+//;
 	return $self->{"longitude"}
 }
 
 sub getMeasuredDepth {
 	my $self = shift;
 	return $self->{"measured_depth"} if exists $self->{"measured_depth"};
-	$self->{"string"} =~ /^A.{64}(.{5})/m;
-	$self->{"measured_depth"} = $1;
-	$self->{"measured_depth"} =~ s/\s+// if $self->{"measured_depth"};
+	$self->{"measured_depth"} = substr($self->{"string"}, 113, 10);
+	$self->{"measured_depth"} =~ s/^\s+// if $self->{"measured_depth"};
 	return $self->{"measured_depth"}
 }
 
 sub getOperator {
 	my $self = shift;
 	return $self->{"operator"} if exists $self->{"operator"};
-	$self->{"string"} =~ /^C(.{23})/m;
-	($self->{"operator"} = $1) =~ s/\s+$//;
+	$self->{"operator"} = substr($self->{"string"}, 226, 30);
+	$self->{"operator"} =~ s/\s+$//;
 	return $self->{"operator"}
 }
 
 sub getSpudDate {
 	my $self = shift;
 	return $self->{"spud_date"} if exists $self->{"spud_date"};
-	$self->{"string"} =~ /^DA.{68}(.{8})/m;
-	($self->{"spud_date"} = $1) =~ s/\s+// if $1;
+	$self->{"spud_date"} = substr($self->{"string"}, 51, 10);
+	$self->{"spud_date"} =~ s/\s+$// if $self->{"spud_date"};
 	return $self->{"spud_date"}
 }
 
 sub getTwoPointDirectionalSurvey {
 	my $self = shift;
+	my $lat_top = $self->getLatitude;
+	my $long_top = $self->getLongitude;
+	my $lat_bot = $self->getBottomLatitude;
+	my $long_bot = $self->getBottomLongitude;
 	return $self->{"two_point_directional_survey"} if exists $self->{"two_point_directional_survey"};
-	$self->{"string"} =~ /^DA(.{9})(.{10})/m;
-	my ($lat_bot, $long_bot) = ($1, $2);
-	my ($lat_top, $long_top) = ($self->getLatitude, $self->getLongitude);
-	map {s/\s+//} $lat_bot, $long_bot;
-	return "" unless ($lat_bot && $long_bot);
+	return undef unless ($lat_bot && $long_bot);
+	return undef if ($lat_bot == $lat_top and $long_bot == $long_top);
 	my $feet_per_deg_lat = M_PER_SEC_LAT*3600*FT_PER_M;
 	my $feet_per_deg_long = FT_PER_M*PI/180*(cos($lat_top*PI/180))*(sqrt(((MAJOR_AXIS**4)*(cos($lat_top*PI/180)**2)+(MINOR_AXIS**4)*(sin($lat_top*PI/180)**2))/(((MAJOR_AXIS*(cos($lat_top*PI/180)))**2)+((MINOR_AXIS*(sin($lat_top*PI/180)))**2))));
 	my $text = $self->getUwi . ", 0, 0, 0\n";
@@ -112,24 +113,25 @@ sub getTwoPointDirectionalSurvey {
 sub getUwi {
 	my $self = shift;
 	return $self->{"uwi"} if exists $self->{"uwi"};
-	$self->{"string"} =~ /^A(\d{14})/m;
-	$self->{"uwi"} = $1;
+	$self->{"uwi"} = substr($self->{"string"}, 380, 12);
+	$self->{"uwi"} .= "00";
+	$self->{"uwi"} = undef unless $self->{"uwi"} =~ m/[\d]{14}/;
 	return $self->{"uwi"}
 }
 
 sub getWellName {
 	my $self = shift;
 	return $self->{"well_name"} if exists $self->{"well_name"};
-	$self->{"well_name"} = $self->getLeaseName . "_" . $self->getWellNumber;
-	$self->{"well_name"} =~ s/\s/_/g;
+	$self->{"well_name"} = substr($self->{"string"}, 393, 16);
+	$self->{"well_name"} =~ s/\s+$//;
 	return $self->{"well_name"}
 }
 
 sub getWellNumber {
 	my $self = shift;
 	return $self->{"well_number"} if exists $self->{"well_number"};
-	$self->{"string"} =~ /^C.{42}(.{10})/m;
-	($self->{"well_number"} = $1) =~ s/\s+$//;
+	$self->{"well_number"} = substr($self->{"string"}, 410, 6);
+	$self->{"well_number"} =~ s/\s+//;
 	return $self->{"well_number"}
 }
 

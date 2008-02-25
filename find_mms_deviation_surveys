@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use LexcoFile;
+use MMSFile;
+
+## Provide usage information
+die "Usage: $0 <lexco_file> <mms_file> <deviations_output> <2_points_output>\n" unless $#ARGV == 3;
+
+## Gather a list of UWI's on stdin
+my %uwis;
+while (<STDIN>) { chomp; $uwis{$_} = 1 }
+
+## Open lexco_file for reading
+my $lexco = LexcoFile->read($ARGV[0]);
+
+## Load all of the deviation records in mms_file
+my $mms = MMSFile->Load($ARGV[1]);
+
+## Open output files
+open DEVS, ">$ARGV[2]" or die "Can't open \"$ARGV[2]\"\n";
+open TWOS, ">$ARGV[3]" or die "Can't open \"$ARGV[3]\"\n";
+
+## Print any directional surveys for requested UWI's
+while (my $lexco_record = $lexco->nextRecord) {
+	next unless $uwis{$lexco_record->getUwi};
+	if (my $mms_record = $mms->findByUwi($lexco_record->getUwi)) {
+		print DEVS $mms_record->getDirectionalSurvey
+	} elsif ($lexco_record->getTwoPointDirectionalSurvey) {
+		print TWOS $lexco_record->getTwoPointDirectionalSurvey
+	}
+}
