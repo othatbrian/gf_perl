@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
 use GFProject;
+use Helpers;
 use PI297Record;
 use PI297File;
 use POSIX qw/strftime/;
@@ -27,17 +29,36 @@ my %well_codes = (
 );
 
 ## Provide usage information
-die "Usage: $0 <project> <password> <pid_well_file>\n" unless $#ARGV == 2;
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) GeoFrame project name\n" .
+"  (req) GeoFrame project password\n" .
+"  (req) Name of PI Dwights export file (*.97f)\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($proj_name, $proj_pass, $pi_file);
+if ($ask) {
+	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+	$proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
+	$pi_file = prompt_with "Enter name of PIDwights export file (*.97f): ";
+} else {
+	($proj_name, $proj_pass, $pi_file) = @ARGV;
+}
+
 
 ## Connect to the project
-my $proj = GFProject->connect(@ARGV[0,1]) or die;
+my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 
 ## Get a list of all UWI's currently in the project
 my %uwis_in_project;
 map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
 
 ## Process the file
-my $input = PI297File->read($ARGV[2]);
+my $input = PI297File->read($pi_file);
 my $included = my $total = 0;
 my ($record, $date, $day, $month, $year);
 while ($record = $input->nextRecord) {

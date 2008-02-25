@@ -3,25 +3,57 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
+use Helpers;
 use LexcoFile;
 use MMSFile;
 
 ## Provide usage information
-die "Usage: $0 <lexco_file> <mms_file> <deviations_output> <2_points_output>\n" unless $#ARGV == 3;
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req only if interactive) Name of file containing desired UWIs\n" .
+"  (req) Name of Lexco well export file (well.txt)\n" .
+"  (req) Name of MMS file (DSPTSFfd.txt)\n" .
+"  (req) Name of output file for MMS deviations\n" .
+"  (req) Name of output file for 2 point deviations\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
 
-## Gather a list of UWI's on stdin
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($uwi_file, $lexco_file, $mms_file, $devs, $twos);
+if ($ask) {
+	$uwi_file = prompt_with "Enter name of file containing desired UWIs: ";
+	$lexco_file = prompt_with "Enter name of Lexco well export file: ";
+	$mms_file = prompt_with "Enter name of MMS file: ";
+	$devs = prompt_with "Enter name of output file for MMS deviations: ";
+	$twos = prompt_with "Enter name of output file for 2 point deviations: "
+} else {
+	($lexco_file, $mms_file, $devs, $twos) = @ARGV
+}
+
+## Create a list of UWI's
 my %uwis;
-while (<STDIN>) { chomp; $uwis{$_} = 1 }
+if ($ask) {
+	open(UWIS, $uwi_file) or die "Could not open file $uwi_file\n";
+	while (<UWIS>) {
+		chomp;
+		for (split /\r/) { $uwis{$_} = 1 }
+	}
+} else {
+	while (<STDIN>) { chomp; $uwis{$_} = 1 }
+}
 
 ## Open lexco_file for reading
-my $lexco = LexcoFile->read($ARGV[0]);
+my $lexco = LexcoFile->read($lexco_file);
 
 ## Load all of the deviation records in mms_file
-my $mms = MMSFile->Load($ARGV[1]);
+my $mms = MMSFile->Load($mms_file);
 
 ## Open output files
-open DEVS, ">$ARGV[2]" or die "Can't open \"$ARGV[2]\"\n";
-open TWOS, ">$ARGV[3]" or die "Can't open \"$ARGV[3]\"\n";
+open DEVS, ">$devs" or die "Could not open file $devs\n";
+open TWOS, ">$twos" or die "Could not open file $twos\n";
 
 ## Print any directional surveys for requested UWI's
 while (my $lexco_record = $lexco->nextRecord) {

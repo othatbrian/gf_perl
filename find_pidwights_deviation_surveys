@@ -3,21 +3,51 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
+use Helpers;
 use PI297File;
 
 ## Provide usage information
-die "Usage: $0 <input_file> <deviations_output> <2_points_output>\n" unless $#ARGV == 2;
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req only if interactive) Name of file containing desired UWIs\n" .
+"  (req) Name of PIDwights export file (*.97f)\n" .
+"  (req) Name of output file for MMS deviations\n" .
+"  (req) Name of output file for 2 point deviations\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($uwi_file, $pid_file, $devs, $twos);
+if ($ask) {
+	$uwi_file = prompt_with "Enter name of file containing desired UWIs: ";
+	$pid_file = prompt_with "Enter name of PIDwights export file: ";
+	$devs = prompt_with "Enter name of output file for PIDwights deviations: ";
+	$twos = prompt_with "Enter name of output file for 2 point deviations: "
+} else {
+	($pid_file, $devs, $twos) = @ARGV
+}
 
 ## Gather a list of UWI's on stdin
 my %uwis;
-while (<STDIN>) { chomp; $uwis{$_} = 1 }
+if ($ask) {
+	open(UWIS, $uwi_file) or die "Could not open file $uwi_file\n";
+	while (<UWIS>) {
+		chomp;
+		for (split /\r/) { $uwis{$_} = 1 }
+	}
+} else {
+	while (<STDIN>) { chomp; $uwis{$_} = 1 }
+}
 
 ## Open the PIDwight's 297 format file
-my $input = PI297File->read($ARGV[0]);
+my $input = PI297File->read($pid_file);
 
 ## Open output files
-open DEVS, ">$ARGV[1]" or die "Can't open \"$ARGV[1]\"\n";
-open TWOS, ">$ARGV[2]" or die "Can't open \"$ARGV[2]\"\n";
+open DEVS, ">$devs" or die "Could not open file $devs\n";
+open TWOS, ">$twos" or die "Could not open file $twos\n";
 
 ## Print any directional surveys for requested UWI's
 while (my $record = $input->nextRecord) {
