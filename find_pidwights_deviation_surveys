@@ -11,7 +11,7 @@ use PI297File;
 my $usage_text =
 "Usage: $0 accepts these parameters:\n" .
 "  (opt) '-i' will interactively request all parameters\n" .
-"  (req only if interactive) Name of file containing desired UWIs\n" .
+"  (req if interactive) Name of file containing desired UWIs\n" .
 "  (req) Name of PIDwights export file (*.97f)\n" .
 "  (req) Name of output file for MMS deviations\n" .
 "  (req) Name of output file for 2 point deviations\n";
@@ -39,7 +39,10 @@ if ($ask) {
 		for (split /\r/) { $uwis{$_} = 1 }
 	}
 } else {
-	while (<STDIN>) { chomp; $uwis{$_} = 1 }
+	while (<STDIN>) {
+		chomp;
+		for (split /\r/) { $uwis{$_} = 1 }
+	}
 }
 
 ## Open the PIDwight's 297 format file

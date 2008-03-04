@@ -35,10 +35,10 @@ my $usage_text =
 "  (req) GeoFrame project name\n" .
 "  (req) GeoFrame project password\n" .
 "  (req) Name of PI Dwights export file (*.97f)\n" .
-"  (req) Name of output file\n";
+"  (req if interactive) Name of output file\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
 my ($proj_name, $proj_pass, $pi_file, $output_file);
@@ -48,7 +48,7 @@ if ($ask) {
 	$pi_file = prompt_with "Enter name of PIDwights export file (*.97f): ";
 	$output_file = prompt_with "Enter name of output file to create: "
 } else {
-	($proj_name, $proj_pass, $pi_file, $output_file) = @ARGV;
+	($proj_name, $proj_pass, $pi_file) = @ARGV;
 }
 
 
@@ -59,8 +59,8 @@ my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 my %uwis_in_project;
 map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
 
-## Open the output file
-open OUTPUT, ">$output_file" or die;
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die }
 
 ## Process the file
 my $input = PI297File->read($pi_file);
@@ -93,9 +93,9 @@ while ($record = $input->nextRecord) {
 	}
 	## Create the output
 	$included++;
-	print OUTPUT join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}), "\n"
+	$_ = join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}) . "\n";
+	$ask ? print OUTPUT : print
 }
-close OUTPUT;
 
 print STDERR "Processed $total wells\n";
 print STDERR "Included $included wells\n";

@@ -34,11 +34,11 @@ my $usage_text =
 "  (req) GeoFrame project name\n" .
 "  (req) GeoFrame project password\n" .
 "  (req) Name of file containing list of blocks\n" .
-"  (req) Name of Lexco well export file (well.txt)\n"
-"  (req) Name of output file to create\n";
+"  (req) Name of Lexco well export file (well.txt)\n" .
+"  (req if interactive) Name of output file to create\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 4 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
 my ($proj_name, $proj_pass, $blocks_file, $lexco_file, $output_file);
@@ -49,7 +49,7 @@ if ($ask) {
 	$lexco_file = prompt_with "Enter name of Lexco export file: ";
 	$output_file = prompt_with "Enter name of output file to create: "
 } else {
-	($proj_name, $proj_pass, $blocks_file, $lexco_file, $output_file) = @ARGV
+	($proj_name, $proj_pass, $blocks_file, $lexco_file) = @ARGV
 }
 
 ## Connect to the project
@@ -75,8 +75,8 @@ while(<BLOCKS>) {
 	}
 }
 
-## Open the output file
-open OUTPUT, ">$output_file" or die;
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die }
 
 ## Process the file
 my $input = LexcoFile->read($lexco_file);
@@ -114,9 +114,9 @@ while ($record = $input->nextRecord) {
 	
 	## Create the output
 	$included++;
-	print OUTPUT join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}), "\n"
+	$_ = join("|", $record->getUwi, $record->getWellName, $record->getLeaseName, $record->getWellNumber, $record->getLatitude, $record->getLongitude, $record->getOperator, $date, $record->getElevation, $record->getMeasuredDepth, $well_codes{$record->getFinalWellClass}) . "\n";
+	$ask ? print OUTPUT : print
 }
-close OUTPUT;
 
 print STDERR "Processed $total wells\n";
 print STDERR "Included $included wells\n";

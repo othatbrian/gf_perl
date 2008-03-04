@@ -12,7 +12,7 @@ use MMSFile;
 my $usage_text =
 "Usage: $0 accepts these parameters:\n" .
 "  (opt) '-i' will interactively request all parameters\n" .
-"  (req only if interactive) Name of file containing desired UWIs\n" .
+"  (req if interactive) Name of file containing desired UWIs\n" .
 "  (req) Name of Lexco well export file (well.txt)\n" .
 "  (req) Name of MMS file (DSPTSFfd.txt)\n" .
 "  (req) Name of output file for MMS deviations\n" .
@@ -42,7 +42,10 @@ if ($ask) {
 		for (split /\r/) { $uwis{$_} = 1 }
 	}
 } else {
-	while (<STDIN>) { chomp; $uwis{$_} = 1 }
+	while (<STDIN>) {
+		chomp;
+		for (split /\r/) { $uwis{$_} = 1 }
+	}
 }
 
 ## Open lexco_file for reading

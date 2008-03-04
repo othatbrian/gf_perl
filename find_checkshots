@@ -11,7 +11,7 @@ use VelDatFile;
 my $usage_text =
 "Usage: $0 accepts these parameters:\n" .
 "  (opt) '-i' will interactively request all parameters\n" .
-"  (req only if interactive) Name of file containing desired UWIs\n" .
+"  (req if interactive) Name of file containing desired UWIs\n" .
 "  (req) Name of Velocity Data export file (VelSrv_ALL.csv)\n" .
 "  (req) Name of output file to create\n";
 my $ask;
@@ -37,7 +37,10 @@ if ($ask) {
 		for (split /\r/) { $uwis{$_} = 1 }
 	}
 } else {
-	while (<STDIN>) { chomp; $uwis{$_} = 1 }
+	while (<STDIN>) {
+		chomp;
+		for (split /\r/) { $uwis{$_} = 1 }
+	}
 }
 
 ## Open the Velocity Data file
