@@ -13,7 +13,7 @@ my $usage_text =
 "  (opt) '-i' will interactively request all parameters\n" .
 "  (req if interactive) Name of file containing desired UWIs\n" .
 "  (req) Name of Velocity Data export file (VelSrv_ALL.csv)\n" .
-"  (req) Name of output file to create\n";
+"  (req if interactive) Name of output file to create\n";
 my $ask;
 GetOptions("i" => \$ask);
 unless ($#ARGV == 0 or $ask) { print STDERR $usage_text; exit 1 }
@@ -46,15 +46,11 @@ if ($ask) {
 ## Open the Velocity Data file
 my $input = VelDatFile->read($veldat_file);
 
-## Open the output file
-open OUTPUT, ">$output_file" or die;
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die }
 
 ## Print any checkshots for requested UWI's
 while (my $record = $input->nextRecord) {
 	$uwis{$record->getUwi} or next;
-	if ($ask) {
-		print OUTPUT $record->getCheckshot
-	} else {
-		print $record->getCheckshot
-	}
+	$ask ? print OUTPUT $record->getCheckshot : print $record->getCheckshot
 }
