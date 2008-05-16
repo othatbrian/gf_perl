@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+	<title>HowTo: Onshore Well Loading</title>
+	<link href="docs.css" media="screen" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="content_area">
+	<div id="page_title">HowTo: Onshore Well Loading</div>
+	<p>This tutorial aims to provide an overview of loading new well information into onshore GeoFrame projects in Houston Energy's GeoFrame environment.  All examples will be referencing a live project hh_dist2_rp2.</p>
+	<div class="task">Determine Counties of Interest</div>
+	<p>The first step in the process is to determine in which counties the surveys lie, as wells will be loaded by county.  The easiest way to do this is to open a basemap, post all surveys, and post county culture.</p>
+	<div class="task">Export PI/Dwights Data</div>
+	<p>Well data for onshore wells is provided by PI/Dwights, which is a Windows based application.</p>
+	<ol>
+		<li>Start PI/Dwights on a PC.</li>
+		<li>When it starts, it will ask to open a region; select <span class="gui_text">Gulf Coast Texas / US Well Data</span> or <span class="gui_text">Louisiana &amp; Arkansas / US Well Data</span> and click the <span class="gui_text">Open</span> button.
+		</li>
+		<li>In the left column, click the <span class="gui_text">Location</span> button.</li>
+		<li>In the left column, click the <span class="gui_text">State / County</span> button.</li>
+		<li>Select a county of interest.</li>
+		<li>Click the <span class="gui_text">Include</span> button and it will appear in the <span class="gui_text">Criteria Log</span> area.</li>
+		<li>Repeat steps 5-6 for all counties of interest.  All counties of interest should appear in the <span class="gui_text">Criteria Log</span> area.</li>
+		<li>Click the <span class="gui_text">File</span> dropdown menu.</li>
+		<li>Select <span class="gui_text">Output...</span>.</li>
+		<li>Select <span class="gui_text">297Well (Fixed Field)</span>.</li>
+		<li>Click the <span class="gui_text">Save...</span> button.</li>
+		<li>Browse to <span class="gui_text">My Network Places -> Entire Network -> Microsoft Windows Network -> Hei -> Hen01 -> Wells -> NEW -> PI_DWIGHTS</span> and inside here are folders for year (4 digits) underscore month (2 digits) of the PI/Dwights data (i.e. 2008_03), which can be found by going to <span class="gui_text">Help -> Data Vintage...</span> and looking at the <span class="gui_text">Released</span> month.  Save the file with the name of the project (in this case <span class="command">hh_dist2_rp2</span>), and the extension should automatically be <span class="command">.97f</span>.</li>
+	</ol>
+	<div class="task">Modify Shell Environment</div>
+	<p>Several Perl scripts must be run to create the files necessary to load into GeoFrame.  Start a command line window (i.e. XTerm or Terminal) and run the following command to prepare your environment:</p>
+	<div class="example">
+		<div class="command">hes39% setenv PATH /apps/opensource/bin:/data/Wells/system/current/bin:${PATH}
+hes39% setenv PERL5LIB /data/Wells/system/current/lib
+hes39% setenv ORACLE_HOME /apps/oracle/instant_client/solaris
+hes39% setenv LD_LIBRARY_PATH /apps/oracle/instant_client/solaris:$LD_LIBRARY_PATH
+hes39% setenv TNS_ADMIN $ORACLE_HOME
+hes39% setenv TWO_TASK oragf</div>
+	</div>
+	<div class="task">Create Loadable File For New Wells</div>
+	<p>In order to load new wells into GeoFrame, a file must be created containing information about those wells.  The script <span class="command">find_new_pidwights_wells</span> will query a project and create a file which contains information about all available wells which are not currently loaded in the project.  The general process is:</p>
+	<ol>
+		<li>Create a directory for the loadable well file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of the vintage of the data.  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Change to the directory previously created, i.e. <span class="command">cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Run the command <span class="command">find_new_pidwights_wells -i</span></li>
+		<li>Enter then name of the project of interest, in this case <span class="command">hh_dist2_rp2</span></li>
+		<li>Enter a password to access the project.</li>
+		<li>Enter the name of the PI/Dwights export file containing well data, in this case <span class="command">/data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f</span></li>
+		<li>Enter the name of the file to create, for example <span class="command">new_wells</span></li>
+	</ol>
+	<p>This is an example of a session to create the loadable well files:</p>
+	<div class="example">
+		<span class="command">hes39% mkdir /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03
+hes39% cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03
+hes39% find_new_pidwights_wells -i
+Enter name of GeoFrame project to query: hh_dist2_rp2
+Enter password of GeoFrame project to query: 
+Enter name of PIDwights export file (*.97f): /data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f
+Enter name of output file to create: new_wells
+Warning: discarding 42469019690001 as it has no location information
+Warning: discarding 42469019690002 as it has no location information
+Warning: discarding 42469019690000 as it has no location information
+Warning: discarding 42469017150000 as it has no location information
+Warning: discarding 42025335610000 as it has no location information
+Warning: discarding 42025600030001 as it has no location information
+Warning: discarding 42025600030000 as it has no location information
+Warning: discarding 42025335540000 as it has no location information
+Warning: discarding 42025335530000 as it has no location information
+Warning: discarding 42175340730000 as it has no location information
+Warning: discarding 42175340700000 as it has no location information
+Warning: discarding 42175340750000 as it has no location information
+Warning: discarding 42285334650000 as it has no location information
+Warning: discarding 42297347740000 as it has no location information
+Warning: discarding 42297347670000 as it has no location information
+Warning: discarding 42297347660000 as it has no location information
+Warning: discarding 42255315740000 as it has no location information
+Warning: discarding 42255301130000 as it has no location information
+Warning: discarding 42285334670000 as it has no location information
+Warning: discarding 42469302290000 as it has no location information
+Warning: discarding 42469340930000 as it has no location information
+Warning: discarding 42469023610000 as it has no location information
+Warning: discarding 42469340890000 as it has no location information
+Warning: discarding 42469340900000 as it has no location information
+Warning: discarding 42469327690000 as it has no location information
+Warning: discarding 42297347730000 as it has no location information
+Warning: discarding 42297339430000 as it has no location information
+Warning: discarding 42297008280000 as it has no location information
+Warning: discarding 42297000960000 as it has no location information
+Warning: discarding 42297600050000 as it has no location information
+Warning: discarding 42297000970000 as it has no location information
+Warning: discarding 42297028350000 as it has no location information
+Processed 36708 wells
+Included 4284 wells
+hes39% </span>
+	</div>
+	<div class="task">Load Wells</div>
+	<p>After the loadable wells file has been created, it can be loaded into GeoFrame.  To load the wells into GeoFrame:</p>
+	<ol>
+		<li>Start GeoFrame, select the project of interest, enter the necessary password, click the <span class="gui_text">Connect</span> button, and then click the <span class="gui_text">Application Manager...</span> button.</li>
+		<li>In the <span class="gui_text">Application Manager</span> window, click on <span class="gui_text">Data</span> button in the <span class="gui_text">Managers</span> area.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Data Managers</span> folder, select <span class="gui_text">Wells and Boreholes</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">Project Borehole Data Manager</span> window, just below the row of buttons across the top, there is a line that starts with <span class="gui_text">Selection Source</span> and the first bullet (<span class="gui_text">Database</span>) is selected.  Make note of the number after the <span class="gui_text">Database</span> bullet - in the test case, it is <span class="gui_text">32476</span>.  This is the number of wells already in the project.</li>
+		<li>Click the <span class="gui_text">Cancel</span> button at the bottom of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Loaders and Unloaders</span> folder, select <span class="gui_text">ASCII Load</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Input File(s)...</span> button.</li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, if there are any files already in the <span class="gui_text">Selection</span> area, select them and click <span class="gui_text">Remove</span></li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, change the <span class="gui_text">Filter</span> to be the directory where the wells file is with a "/*" at the end, for example <span class="command">/data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03/*</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>The loadable well file created in previous tasks should appear in the <span class="gui_text">Files</span> area.  Click the <span class="command">new_wells</span> file and it will appear in the <span class="gui_text">Selection</span> area and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Control File...</span> button.</li>
+		<li>In the <span class="gui_text">Select Control File</span> window, change the <span class="gui_text">Filter</span> to be <span class="command">/data/Wells/system/current/etc/*.ctl</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>In the <span class="gui_text">Files</span> area, select the <span class="gui_text">well.ctl</span> file and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Target Field...</span> button.</li>
+		<li>In the <span class="gui_text">Select Target Field</span> window, enter <span class="command">updates_YYYY_MM</span> (where YYYY is the year and MM is the month) in the <span class="gui_text">Selection</span> box and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, enter <span class="command">pidwights</span> in the <span class="gui_text">Target Source</span> box.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Run</span> button.  This process can take anywhere from several minutes to several hours depending on the number of wells being loaded.</li>
+		<li>To determine how many wells should have been loaded, in the directory containing the loadable well file (i.e. <span class="command">/data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span>), run <span class="command">wc -l new_wells</span> and the number listed is the number of wells in the file.  Our example shows a total of <span class="command">4284</span> wells in the file:
+			<div class="example">
+				<span class="command">hes39% wc -l new_wells
+    4284 new_wells
+hes39% </span>
+			</div>
+		</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Exit</span> button and click <span class="gui_text">OK</span> in the confirmation window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, select <span class="gui_text">Wells and Boreholes</span> and click <span class="gui_text">Apply</span>.</li>
+		<li>As in step 4, confirm that the number listed by the <span class="gui_text">Database</span> selection is equal to the number obtained in step 4 plus the number of wells loaded obtained in step 17.  In the example case, the number is <span class="gui_text">36760</span>, which does equal <span class="gui_text">32476</span> + <span class="gui_text">4284</span>.  If the current number of wells does not equal the starting number of wells (step 4) plus the wells loaded (step 17), there is a problem which must be corrected.</li>
+	</ol>
+	<div class="task">Create Loadable File For New Deviation Surveys</div>
+	<p>There are two main types of deviation surveys to be loaded: "real" deviation surveys which are actual deviation surveys provided by vendors and "two point" deviation surveys where are created artificially to allow GeoFrame to display a straight line to a known bottom hole location.  This task covers the creation of a loadable file for "real" deviation surveys.  After the "real" deviations have been loaded into GeoFrame, "two point" deviation surveys can be created, which is addressed in a following task.</p>
+	<ol>
+		<li>Create a directory for the loadable deviation surveys file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of either the date the updates are created or the vintage of the data (this is still up for negotiation).  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Change to the directory previously created, i.e. <span class="command">cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Run the command <span class="command">find_new_pidwights_deviations -i</span></li>
+		<li>Enter then name of the project of interest, in this case <span class="command">hh_dist2_rp2</span></li>
+		<li>Enter a password to access the project.</li>
+		<li>Enter the name of the PI/Dwights export file containing well data, in this case <span class="command">/data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f</span></li>
+		<li>Enter the name of the file to create, for example <span class="command">new_deviations</span></li>
+	</ol>
+	<p>This is an example of a session to create the loadable well files:</p>
+	<div class="example">
+		<span class="command">hes39% cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03
+hes39% find_new_pidwights_deviations -i
+Enter name of GeoFrame project to query: hh_dist2_rp2
+Enter password of GeoFrame project to query: 
+Enter name of PIDwights export file (*.97f): /data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f
+Enter name of output file to create: new_deviations
+hes39% </span>
+	</div>
+	<div class="task">Load Deviation Surveys</div>
+	<p>After the loadable deviation surveys file has been created, it can be loaded into GeoFrame.  To load the deviation surveys into GeoFrame:</p>
+	<ol>
+		<li>Start GeoFrame, select the project of interest, enter the necessary password, click the <span class="gui_text">Connect</span> button, and then click the <span class="gui_text">Application Manager...</span> button.</li>
+		<li>In the <span class="gui_text">Application Manager</span> window, click on <span class="gui_text">Data</span> button in the <span class="gui_text">Managers</span> area.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Data Managers</span> folder, select <span class="gui_text">Wells and Boreholes</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">Project Borehole Data Manager</span> window, just below the row of buttons across the top, there is a line that starts with <span class="gui_text">Selection Source</span> and the first bullet (<span class="gui_text">Database</span>) is selected.  Make note of the number after the <span class="gui_text">Database</span> bullet - in the test case, it is <span class="gui_text">36760</span>.  This is the number of wells already in the project.</li>
+		<li>Click the <span class="gui_text">Cancel</span> button at the bottom of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Loaders and Unloaders</span> folder, select <span class="gui_text">ASCII Load</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Input File(s)...</span> button.</li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, if there are any files already in the <span class="gui_text">Selection</span> area, select them and click <span class="gui_text">Remove</span></li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, change the <span class="gui_text">Filter</span> to be the directory where the deviation surveys file is with a "/*" at the end, for example <span class="command">/data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03/*</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>The loadable deviation surveys file created in previous tasks should appear in the <span class="gui_text">Files</span> area.  Click the <span class="command">new_deviations</span> file and it will appear in the <span class="gui_text">Selection</span> area and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Control File...</span> button.</li>
+		<li>In the <span class="gui_text">Select Control File</span> window, change the <span class="gui_text">Filter</span> to be <span class="command">/data/Wells/system/current/etc/*.ctl</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>In the <span class="gui_text">Files</span> area (you may have to expand the window to see it), select the <span class="gui_text">deviation_survey.ctl</span> file and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Target Field...</span> button.</li>
+		<li>In the <span class="gui_text">Select Target Field</span> window, enter <span class="command">updates_YYYY_MM</span> (where YYYY is the year and MM is the month) in the <span class="gui_text">Selection</span> box and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, enter <span class="command">pidwights</span> in the <span class="gui_text">Target Source</span> box.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Run</span> button.  This process can take anywhere from several minutes to several hours depending on the number of deviation surveys being loaded.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Exit</span> button and click <span class="gui_text">OK</span> in the confirmation window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, select <span class="gui_text">Wells and Boreholes</span> and click <span class="gui_text">Apply</span>.</li>
+		<li>As in step 4, confirm that the number listed by the <span class="gui_text">Database</span> selection is equal to the number obtained in step 4.  In the example case, the number is <span class="gui_text">36760</span>, which does equal <span class="gui_text">36760</span>.  If the current number of wells does not equal the starting number of wells (step 4), there is a problem which must be corrected.</li>
+	</ol>
+	<div class="task">Create Loadable File For New Two Point Deviation Surveys</div>
+	<p>There are two main types of deviation surveys to be loaded: "real" deviation surveys which are actual deviation surveys provided by vendors and "two point" deviation surveys where are created artificially to allow GeoFrame to display a straight line to a known bottom hole location.  This task covers the creation of a loadable file for "two point" deviation surveys.</p>
+	<ol>
+		<li>Create a directory for the loadable two point deviation surveys file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of either the date the updates are created or the vintage of the data (this is still up for negotiation).  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Change to the directory previously created, i.e. <span class="command">cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03</span></li>
+		<li>Run the command <span class="command">create_new_pidwights_two_points -i</span></li>
+		<li>Enter then name of the project of interest, in this case <span class="command">hh_dist2_rp2</span></li>
+		<li>Enter a password to access the project.</li>
+		<li>Enter the name of the PI/Dwights export file containing well data, in this case <span class="command">/data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f</span></li>
+		<li>Enter the name of the file to create, for example <span class="command">new_twos</span></li>
+	</ol>
+	<p>This is an example of a session to create the loadable well files:</p>
+	<div class="example">
+		<span class="command">hes39% cd /data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03
+hes39% create_new_pidwights_two_points -i
+Enter name of GeoFrame project to query: hh_dist2_rp2
+Enter password of GeoFrame project to query: 
+Enter name of PIDwights export file (*.97f): /data/Wells/NEW/PI_DWIGHTS/2008_03/hh_dist2_rp2.97f
+Enter name of output file to create: new_twos
+hes39% </span>
+	</div>
+	<div class="task">Load Two Point Deviation Surveys</div>
+	<p>After the loadable two point deviation surveys file has been created, it can be loaded into GeoFrame.  To load the two point deviation surveys into GeoFrame:</p>
+	<ol>
+		<li>Start GeoFrame, select the project of interest, enter the necessary password, click the <span class="gui_text">Connect</span> button, and then click the <span class="gui_text">Application Manager...</span> button.</li>
+		<li>In the <span class="gui_text">Application Manager</span> window, click on <span class="gui_text">Data</span> button in the <span class="gui_text">Managers</span> area.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Data Managers</span> folder, select <span class="gui_text">Wells and Boreholes</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">Project Borehole Data Manager</span> window, just below the row of buttons across the top, there is a line that starts with <span class="gui_text">Selection Source</span> and the first bullet (<span class="gui_text">Database</span>) is selected.  Make note of the number after the <span class="gui_text">Database</span> bullet - in the test case, it is <span class="gui_text">36760</span>.  This is the number of wells already in the project.</li>
+		<li>Click the <span class="gui_text">Cancel</span> button at the bottom of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Loaders and Unloaders</span> folder, select <span class="gui_text">ASCII Load</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Input File(s)...</span> button.</li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, if there are any files already in the <span class="gui_text">Selection</span> area, select them and click <span class="gui_text">Remove</span></li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, change the <span class="gui_text">Filter</span> to be the directory where the deviation surveys file is with a "/*" at the end, for example <span class="command">/data/Wells/NEW/PROJECTS/hh_dist2_rp2/updates_2008_03/*</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>The loadable two point deviation surveys file created in previous tasks should appear in the <span class="gui_text">Files</span> area.  Click the <span class="command">new_twos</span> file and it will appear in the <span class="gui_text">Selection</span> area and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Control File...</span> button.</li>
+		<li>In the <span class="gui_text">Select Control File</span> window, change the <span class="gui_text">Filter</span> to be <span class="command">/data/Wells/system/current/etc/*.ctl</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>In the <span class="gui_text">Files</span> area (you may have to expand the window to see it), select the <span class="gui_text">2point_deviation_survey.ctl</span> file and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Target Field...</span> button.</li>
+		<li>In the <span class="gui_text">Select Target Field</span> window, enter <span class="command">updates_YYYY_MM</span> (where YYYY is the year and MM is the month) in the <span class="gui_text">Selection</span> box and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, enter <span class="command">two_points</span> in the <span class="gui_text">Target Source</span> box.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Run</span> button.  This process can take anywhere from several minutes to several hours depending on the number of deviation surveys being loaded.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Exit</span> button and click <span class="gui_text">OK</span> in the confirmation window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, select <span class="gui_text">Wells and Boreholes</span> and click <span class="gui_text">Apply</span>.</li>
+		<li>As in step 4, confirm that the number listed by the <span class="gui_text">Database</span> selection is equal to the number obtained in step 4.  In the example case, the number is <span class="gui_text">36760</span>, which does equal <span class="gui_text">36760</span>.  If the current number of wells does not equal the starting number of wells (step 4), there is a problem which must be corrected.</li>
+	</ol>
+</div>
+</body>
+
+</html>

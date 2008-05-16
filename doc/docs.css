@@ -1,0 +1,50 @@
+body {
+	font-family: sans-serif;
+	margin: 0;
+	line-height: 1.3em;
+	text-align: center;
+}
+
+li {
+	padding: 0.2em 0em;
+}
+
+#content_area {
+	width: 50em;
+	margin: auto;
+	padding: 1em 2em;
+	text-align: left;
+}
+
+#page_title {
+	padding: 0.5em 0em;
+	text-align: center;
+	font-size: 2em;
+	font-weight: bold;
+}
+
+.task {
+	padding-top: 1em;
+	font-size: 1.5em;
+	font-weight: bold;
+}
+
+.example {
+	border: 1px solid;
+	margin: 1em 2em;
+	padding: 0.5em 1em;
+	background-color: #ddd;
+}
+
+.command {
+	font-family: monospace;
+	white-space: pre;
+}
+
+.replace {
+	font-style: italic;
+}
+
+.gui_text {
+	font-weight: bold;
+}

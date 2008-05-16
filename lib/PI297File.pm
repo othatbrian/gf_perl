@@ -32,8 +32,9 @@ sub nextRecord {
 
 sub read {
 	my $caller = shift;
+	my $filename = shift;
 	my $file = new FileHandle;
-	$file->open(shift) or die;
+	$file->open($filename) or die "Could not open file \"$filename\"!\n";
 	my $self = {"file" => $file};
 	bless $self, ref $caller || $caller
 }

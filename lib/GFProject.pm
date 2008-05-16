@@ -85,10 +85,50 @@ sub getMarkersByUwi {
 	return @_
 }
 
+sub getTwoPointsByUwi {
+	my $self = shift;
+	my $sql = "select w.id from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and b.uwi = ? and w.source = 'two_points'";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {}, shift)};
+	return @_
+}
+
 sub getUwiCreationDate {
 	my $self = shift;
 	my $sql = "select create_date from borehole where uwi = ?";
-	return $_dbh->selectrow_arrayref($sql, {}, shift)->[0]
+	$_dbh->selectrow_arrayref($sql, {}, shift)->[0]
+}
+
+sub getUwisWithDeviations {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithDeviations"}} if $self->{"cache"}->{"getUwisWithDeviations"};
+	my $sql = "select distinct b.uwi from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole'";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
+	@{$self->{"cache"}->{"getUwisWithDeviations"}} = 	@_
+}
+
+sub getUwisWithRealDeviations {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithRealDeviations"}} if $self->{"cache"}->{"getUwisWithRealDeviations"};
+	my $sql = "select distinct b.uwi from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and w.source != 'two_points'";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
+	@{$self->{"cache"}->{"getUwisWithRealDeviations"}} = @_
+}
+
+sub getUwisWithTwoPoints {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithTwoPoints"}} if $self->{"cache"}->{"getUwisWithTwoPoints"};
+	my $sql = "select distinct b.uwi from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and w.source = 'two_points'";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
+	@{$self->{"cache"}->{"getUwisWithTwoPoints"}} = @_
+}
+
+sub getUwisWithoutDeviations {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithoutDeviations"}} if $self->{"cache"}->{"getUwisWithoutDeviations"};
+	my %uwis;
+	map {$uwis{$_} = 1} $self->getAllUwis;
+	map {delete $uwis{$_}} $self->getUwisWithDeviations;
+	@{$self->{"cache"}->{"getUwisWithoutDeviations"}} = keys %uwis
 }
 
 ##

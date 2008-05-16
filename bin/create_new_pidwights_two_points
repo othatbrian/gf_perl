@@ -1,0 +1,53 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use GFProject;
+use Helpers;
+use PI297File;
+
+## Provide usage information
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) GeoFrame project name\n" .
+"  (req) GeoFrame project password\n" .
+"  (req) Name of PIDwights export file (*.97f)\n" .
+"  (req) Name of output file for two point deviations\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($proj_name, $proj_pass, $pi_file, $output_file);
+if ($ask) {
+	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+	$proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
+	$pi_file = prompt_with "Enter name of PIDwights export file: ";
+	$output_file = prompt_with "Enter name of output file for two point deviations: "
+} else {
+	($proj_name, $proj_pass, $pi_file) = @ARGV
+}
+
+## Connect to the project
+my $proj = GFProject->connect($proj_name, $proj_pass) or die;
+
+## Create a list of UWI's which have no deviation survey
+my %uwis;
+map {$uwis{$_} = 1} $proj->getUwisWithoutDeviations;
+
+## Open the PIDwights 297 format file
+my $input = PI297File->read($pi_file);
+
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
+
+## Print two point deviation surveys for requested UWI's which don't have a
+## directional survey in PIDwights
+while (my $record = $input->nextRecord) {
+	next unless $uwis{$record->getUwi};
+	next if $record->getDirectionalSurvey;
+	if ($_ = $record->getTwoPointDirectionalSurvey) { $ask ? print OUTPUT : print }
+}
