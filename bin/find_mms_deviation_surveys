@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Getopt::Long;
+use GFProject;
 use Helpers;
 use LexcoFile;
 use MMSFile;
@@ -12,41 +13,35 @@ use MMSFile;
 my $usage_text =
 "Usage: $0 accepts these parameters:\n" .
 "  (opt) '-i' will interactively request all parameters\n" .
-"  (req if interactive) Name of file containing desired UWIs\n" .
+"  (req) GeoFrame project name\n" .
+"  (req) GeoFrame project password\n" .
 "  (req) Name of Lexco well export file (well.txt)\n" .
 "  (req) Name of MMS file (DSPTSFfd.txt)\n" .
-"  (req) Name of output file for MMS deviations\n" .
-"  (req) Name of output file for 2 point deviations\n";
+"  (req) Name of output file for MMS deviations\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 4 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
-my ($uwi_file, $lexco_file, $mms_file, $devs, $twos);
+my ($proj_name, $proj_pass, $lexco_file, $mms_file, $output_file);
 if ($ask) {
-	$uwi_file = prompt_with "Enter name of file containing desired UWIs: ";
+	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+	$proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
 	$lexco_file = prompt_with "Enter name of Lexco well export file: ";
 	$mms_file = prompt_with "Enter name of MMS file: ";
-	$devs = prompt_with "Enter name of output file for MMS deviations: ";
-	$twos = prompt_with "Enter name of output file for 2 point deviations: "
+	$output_file = prompt_with "Enter name of output file for MMS deviations: "
 } else {
-	($lexco_file, $mms_file, $devs, $twos) = @ARGV
+	($proj_name, $proj_pass, $lexco_file, $mms_file) = @ARGV
 }
 
-## Create a list of UWI's
+## Connect to the project
+my $proj = GFProject->connect($proj_name, $proj_pass) or die;
+
+## Create a list of UWI's which have either no deviation survey or a two
+## point deviation survey
 my %uwis;
-if ($ask) {
-	open(UWIS, $uwi_file) or die "Could not open file $uwi_file\n";
-	while (<UWIS>) {
-		chomp;
-		for (split /\r/) { $uwis{$_} = 1 }
-	}
-} else {
-	while (<STDIN>) {
-		chomp;
-		for (split /\r/) { $uwis{$_} = 1 }
-	}
-}
+map {$uwis{$_} = 1} $proj->getUwisWithoutDeviations;
+map {$uwis{$_} = 1} $proj->getUwisWithTwoPoints;
 
 ## Open lexco_file for reading
 my $lexco = LexcoFile->read($lexco_file);
@@ -54,16 +49,13 @@ my $lexco = LexcoFile->read($lexco_file);
 ## Load all of the deviation records in mms_file
 my $mms = MMSFile->Load($mms_file);
 
-## Open output files
-open DEVS, ">$devs" or die "Could not open file $devs\n";
-open TWOS, ">$twos" or die "Could not open file $twos\n";
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
 
 ## Print any directional surveys for requested UWI's
 while (my $lexco_record = $lexco->nextRecord) {
 	next unless $uwis{$lexco_record->getUwi};
 	if (my $mms_record = $mms->findByUwi($lexco_record->getUwi)) {
-		print DEVS $mms_record->getDirectionalSurvey
-	} elsif ($lexco_record->getTwoPointDirectionalSurvey) {
-		print TWOS $lexco_record->getTwoPointDirectionalSurvey
+		if ($_ = $mms_record->getDirectionalSurvey) { $ask ? print OUTPUT : print }
 	}
 }
