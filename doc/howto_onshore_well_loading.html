@@ -218,6 +218,21 @@ hes39% </span>
 		<li>In the <span class="gui_text">Data Management</span> window, select <span class="gui_text">Wells and Boreholes</span> and click <span class="gui_text">Apply</span>.</li>
 		<li>As in step 4, confirm that the number listed by the <span class="gui_text">Database</span> selection is equal to the number obtained in step 4.  In the example case, the number is <span class="gui_text">36760</span>, which does equal <span class="gui_text">36760</span>.  If the current number of wells does not equal the starting number of wells (step 4), there is a problem which must be corrected.</li>
 	</ol>
+	<div class="task">Calculate Deviation Surveys</div>
+	<p>After new deviation surveys have been loaded into GeoFrame, they must undergo calculations to be usable.  To calculate the deviation surveys:</p>
+	<ol>
+		<li>Start GeoFrame, select the project of interest, enter the necessary password, click the <span class="gui_text">Connect</span> button, and then click the <span class="gui_text">Application Manager...</span> button.</li>
+		<li>In the <span class="gui_text">Application Manager</span> window, click on <span class="gui_text">Data</span> button in the <span class="gui_text">Managers</span> area.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Data Managers</span> folder, select <span class="gui_text">Wells and Boreholes</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">Project Borehole Data Manager</span> window, in the row of icons, click the first icon which appears to be a crystal ball with a question mark.</li>
+		<li>In the <span class="gui_text">QueryTool</span> window, click on the <span class="gui_text">with Attribute</span> selection box and change it to <span class="gui_text">containing</span>.</li>
+		<li>Click on the arrow on the right side of the dropdown box under the <span class="gui_text">containing</span> selection and select <span class="gui_text">Well_Deviation_Survey</span>.</li>
+		<li>Click the <span class="gui_text">Add Clause</span> button.</li>
+		<li>Click the <span class="gui_text">OK</span> button.  A <span class="gui_text">Working</span> window will appear as it loads boreholes into the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>After it has finished displaying the boreholes in the <span class="gui_text">Project Borehole Data Manager</span> window, click the <span class="gui_text">Compute...</span> in the bottom right area of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>In the <span class="gui_text">Compute Surveys</span> window, click on the <span class="gui_text">Deviations</span> tab.</li>
+		<li>Click the <span class="gui_text">OK</span> button.  This may take anywhere from several minutes to many [many] minutes depending on how many deviation surveys were loaded.</li>
+	</ol>
 </div>
 </body>
 
