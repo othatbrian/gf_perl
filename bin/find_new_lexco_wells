@@ -95,7 +95,7 @@ while ($record = $input->nextRecord) {
 		
 	## If we have a bogus (or no) latitude or longitude, skip it
 	if (! $record->getLongitude || ! $record->getLatitude || $record->getLongitude =~ /^\D+$/ || $record->getLatitude =~ /^\D+$/) {
-		print STDERR "Warning: discarding bogus record (uwi \"", $record->getUwi, "\")\n";
+		print STDERR "Warning: discarding ", $record->getUwi, " as it has no location information\n";
 		next
 	}
 	
