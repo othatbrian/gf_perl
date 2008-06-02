@@ -48,3 +48,7 @@ li {
 .gui_text {
 	font-weight: bold;
 }
+
+.warn {
+	font-weight: bold;
+}
