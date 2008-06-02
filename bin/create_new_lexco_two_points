@@ -25,7 +25,7 @@ my ($proj_name, $proj_pass, $lexco_file, $output_file);
 if ($ask) {
 	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
 	$proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
-	$lexco_file = prompt_with "Enter name of PIDwights export file: ";
+	$lexco_file = prompt_with "Enter name of Lexco export file: ";
 	$output_file = prompt_with "Enter name of output file for two point deviations: "
 } else {
 	($proj_name, $proj_pass, $lexco_file) = @ARGV
