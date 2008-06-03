@@ -136,7 +136,7 @@ hes39% </span>
 	<div class="task">Create Loadable File For New Two Point Deviation Surveys</div>
 	<p>There are two main types of deviation surveys to be loaded: "real" deviation surveys which are actual deviation surveys provided by vendors and "two point" deviation surveys where are created artificially to allow GeoFrame to display a straight line to a known bottom hole location.  This task covers the creation of a loadable file for "two point" deviation surveys.</p>
 	<ol>
-		<li>Create a directory for the loadable two point deviation surveys file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of either the date the updates are created or the vintage of the data (this is still up for negotiation).  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03</span></li>
+		<li>Create a directory for the loadable two point deviation surveys file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of the vintage of the data.  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03</span></li>
 		<li>Change to the directory previously created, i.e. <span class="command">cd /data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03</span></li>
 		<li>Run the command <span class="command">create_new_mms_two_points -i</span></li>
 		<li>Enter then name of the project of interest, in this case <span class="command">dw_gc_edzin</span></li>
@@ -193,6 +193,51 @@ hes39% </span>
 		<li>After it has finished displaying the boreholes in the <span class="gui_text">Project Borehole Data Manager</span> window, click the <span class="gui_text">Compute...</span> in the bottom right area of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
 		<li>In the <span class="gui_text">Compute Surveys</span> window, click on the <span class="gui_text">Deviations</span> tab.</li>
 		<li>Click the <span class="gui_text">OK</span> button.  This may take anywhere from several minutes to many [many] minutes depending on how many deviation surveys were loaded.</li>
+	</ol>
+	<div class="task">Create Loadable File For New Checkshot Surveys</div>
+	<ol>
+		<li>Create a directory for the loadable checkshot surveys file.  The directory should be in <span class="command">/data/Wells/NEW/PROJECTS</span> and be of the format <span class="replace">project</span>/updates_<span class="replace">YYYY_MM</span>, in which <span class="replace">YYYY_MM</span> is the year and month of the vintage of the data.  For example <span class="command">mkdir /data/Wells/NEW/PROJECTS/dw_gf_edzin/updates_2008_03</span></li>
+		<li>Change to the directory previously created, i.e. <span class="command">cd /data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03</span></li>
+		<li>Run the command <span class="command">find_new_checkshots -i</span></li>
+		<li>Enter then name of the project of interest, in this case <span class="command">dw_gc_edzin</span></li>
+		<li>Enter a password to access the project.</li>
+		<li>Enter the directory containing the velocity data.  It will generally be <span class="command">/data/Wells/NEW/VELOCITY_DATA/</span><span class="replace">YYYY_MM</span>, in this case <span class="command">/data/Wells/NEW/VELOCITY_DATA/2008_05</span></li>
+		<li>Enter the name of the file to create, for example <span class="command">new_cs</span></li>
+	</ol>
+	<p>This is an example of a session to create the loadable well files:</p>
+	<div class="example">
+		<span class="command">hes39% cd /data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03
+hes39% find_new_checkshots -i
+Enter name of GeoFrame project to query: dw_gc_edzin
+Enter password of GeoFrame project to query: 
+Path to veolcity data tree: /data/Wells/NEW/VELOCITY_DATA/2008_05
+Enter name of output file to create: new_cs
+hes39% </span>
+	</div>
+	<p><span class="warn">Note:</span> If the file is empty (<span class="command">ls -l</span> shows 0 bytes), the file is empty (no new information is available).  <span class="warn">Do not try to load the empty file!</span>  Simply skip the following step.</p>
+	<div class="task">Load Checkshot Surveys</div>
+	<p>After the loadable checkshot surveys file has been created, it can be loaded into GeoFrame.  To load the checkshot surveys into GeoFrame:</p>
+	<ol>
+		<li>Start GeoFrame, select the project of interest, enter the necessary password, click the <span class="gui_text">Connect</span> button, and then click the <span class="gui_text">Application Manager...</span> button.</li>
+		<li>In the <span class="gui_text">Application Manager</span> window, click on <span class="gui_text">Data</span> button in the <span class="gui_text">Managers</span> area.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Data Managers</span> folder, select <span class="gui_text">Wells and Boreholes</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">Project Borehole Data Manager</span> window, just below the row of buttons across the top, there is a line that starts with <span class="gui_text">Selection Source</span> and the first bullet (<span class="gui_text">Database</span>) is selected.  Make note of the number after the <span class="gui_text">Database</span> bullet - in the test case, it is <span class="gui_text">987</span>.  This is the number of wells already in the project.</li>
+		<li>Click the <span class="gui_text">Cancel</span> button at the bottom of the <span class="gui_text">Project Borehole Data Manager</span> window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, expand the <span class="gui_text">Loaders and Unloaders</span> folder, select <span class="gui_text">ASCII Load</span>, and click the <span class="gui_text">Apply</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Input File(s)...</span> button.</li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, if there are any files already in the <span class="gui_text">Selection</span> area, select them and click <span class="gui_text">Remove</span></li>
+		<li>In the <span class="gui_text">Select Input File(s)</span> window, change the <span class="gui_text">Filter</span> to be the directory where the deviation surveys file is with a "/*" at the end, for example <span class="command">/data/Wells/NEW/PROJECTS/dw_gc_edzin/updates_2008_03/*</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>The loadable checkshot surveys file created in previous tasks should appear in the <span class="gui_text">Files</span> area.  Click the <span class="command">new_cs</span> file and it will appear in the <span class="gui_text">Selection</span> area and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Control File...</span> button.</li>
+		<li>In the <span class="gui_text">Select Control File</span> window, change the <span class="gui_text">Filter</span> to be <span class="command">/data/Wells/system/current/etc/*.ctl</span> and click the <span class="gui_text">Filter</span> button.</li>
+		<li>In the <span class="gui_text">Files</span> area (you may have to expand the window to see it), select the <span class="gui_text">checkshot.ctl</span> file and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Target Field...</span> button.</li>
+		<li>In the <span class="gui_text">Select Target Field</span> window, enter <span class="command">updates_YYYY_MM</span> (where YYYY is the year and MM is the month) in the <span class="gui_text">Selection</span> box and click the <span class="gui_text">OK</span> button.</li>
+		<li>In the <span class="gui_text">ASCII Load</span> window, enter <span class="command">veldat</span> in the <span class="gui_text">Target Source</span> box.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Run</span> button.  This process can take anywhere from several minutes to several hours depending on the number of deviation surveys being loaded.</li>
+		<li>At the bottom of the <span class="gui_text">ASCII Load</span> window, click the <span class="gui_text">Exit</span> button and click <span class="gui_text">OK</span> in the confirmation window.</li>
+		<li>In the <span class="gui_text">Data Management</span> window, select <span class="gui_text">Wells and Boreholes</span> and click <span class="gui_text">Apply</span>.</li>
+		<li>As in step 4, confirm that the number listed by the <span class="gui_text">Database</span> selection is equal to the number obtained in step 4.  In the example case, the number is <span class="gui_text">987</span>, which does equal <span class="gui_text">987</span>.  If the current number of wells does not equal the starting number of wells (step 4), there is a problem which must be corrected.</li>
 	</ol>
 </div>
 </body>
