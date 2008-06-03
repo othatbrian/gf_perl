@@ -1,0 +1,51 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use GFProject;
+use Helpers;
+use VelDatTree;
+
+## Provide usage information
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) GeoFrame project name\n" .
+"  (req) GeoFrame project password\n" .
+"  (req) Path to velocity data tree\n" .
+"  (req) Name of output file for checkshots\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($proj_name, $proj_pass, $veldat_path, $output_file);
+if ($ask) {
+	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+	$proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
+	$veldat_path = prompt_with "Path to velocity data tree: ";
+	$output_file = prompt_with "Enter name of output file for checkshots: "
+} else {
+	($proj_name, $proj_pass, $veldat_path) = @ARGV
+}
+
+## Connect to the project
+my $proj = GFProject->connect($proj_name, $proj_pass) or die;
+
+## Create a list of UWI's which have no checkshot survey
+my %uwis;
+map {$uwis{$_} = 1} $proj->getUwisWithoutCheckshots;
+
+## Parse the velocity data tree
+my $veldat = VelDatTree->new;
+$veldat->parse($veldat_path);
+
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
+
+## Print any checkshot surveys for requested UWI's
+for my $uwi (sort keys %uwis) {
+	if ($_ = $veldat->getCheckshotByUwi($uwi, {"name" => "VelDat"})) { $ask ? print OUTPUT : print }
+}

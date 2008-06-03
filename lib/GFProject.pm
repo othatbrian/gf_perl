@@ -98,12 +98,20 @@ sub getUwiCreationDate {
 	$_dbh->selectrow_arrayref($sql, {}, shift)->[0]
 }
 
+sub getUwisWithCheckshots {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithCheckshots"}} if $self->{"cache"}->{"getUwisWithCheckshots"};
+	my $sql = "select distinct b.uwi from well_check_shot_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole'";
+	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
+	@{$self->{"cache"}->{"getUwisWithCheckshots"}} = @_
+}
+
 sub getUwisWithDeviations {
 	my $self = shift;
 	return @{$self->{"cache"}->{"getUwisWithDeviations"}} if $self->{"cache"}->{"getUwisWithDeviations"};
 	my $sql = "select distinct b.uwi from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole'";
 	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
-	@{$self->{"cache"}->{"getUwisWithDeviations"}} = 	@_
+	@{$self->{"cache"}->{"getUwisWithDeviations"}} = @_
 }
 
 sub getUwisWithRealDeviations {
@@ -120,6 +128,15 @@ sub getUwisWithTwoPoints {
 	my $sql = "select distinct b.uwi from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and w.source = 'two_points'";
 	map {push @_, $_->[0]} @{$_dbh->selectall_arrayref($sql, {})};
 	@{$self->{"cache"}->{"getUwisWithTwoPoints"}} = @_
+}
+
+sub getUwisWithoutCheckshots {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithoutCheckshots"}} if $self->{"cache"}->{"getUwisWithoutCheckshots"};
+	my %uwis;
+	map {$uwis{$_} = 1} $self->getAllUwis;
+	map {delete $uwis{$_}} $self->getUwisWithCheckshots;
+	@{$self->{"cache"}->{"getUwisWithoutCheckshots"}} = keys %uwis
 }
 
 sub getUwisWithoutDeviations {
