@@ -1,4 +1,4 @@
-gal_GeneralInfo GenInfo_665766631 (
+gal_GeneralInfo GenInfo_32021 (
     AbsentValue = "-999.25",
     Comment = "",
     RecordLength = 256,
@@ -76,7 +76,7 @@ gal_CreateString NextCSName
     ContinueTest = 1,
 );
 
-gal_CreateWellCheckshot CheckshotData_665766631 (
+gal_CreateWellCheckshot CheckshotData_32021 (
     EndOfData = 0,
     Container = {BoreholeDI,BH}[BH.SelectSuccessful],
     PreEndOfData = CurrentBoreholeUWI != NextBoreholeUWI || CheckshotName != NextCSName,
@@ -95,7 +95,7 @@ gal_CreateWellCheckshot CheckshotData_665766631 (
     },
     ArrayUnits = {
         "",
-        "ms",
+        "s",
         "ft",
         "",
     },
