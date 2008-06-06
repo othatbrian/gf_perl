@@ -1,0 +1,29 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use LWP::Simple;
+
+my $filename = "last_download";
+my $last = "";
+open LAST, "$filename";
+if (open LAST, "$filename") {
+	while (<LAST>) { $last .= $_ }
+  close LAST;
+  chomp $last
+}
+
+my $url = "http://www.gomr.mms.gov/homepg/pubinfo/freeasci/well/freewell.html";
+my $text = get $url or die "Could not retrieve $url\n";
+$text =~ /Directional Survey \(Points\)<\/a>\r\n<\/td>\r\n<td width=\"100\" align=\"center\">(..-..-.... ..:..:.. ..)\&nbsp\;/m;
+die "The page at\n\t${url}\nhas changed format.  Please modify $0 appropriately.\n" unless $1;
+unless ($1 eq $last) {
+	getstore("http://www.gomr.mms.gov/homepg/pubinfo/freeasci/well/zipped/delimit/DSPTSF.ZIP", "DSPTSF.ZIP") or die "Could not retrieve $url\n";
+	system "unzip DSPTSF.ZIP";
+	system 'mv DSPTSFfd.txt DSPTSFfd_`date "+%Y%m%d"`.txt';
+	open LAST, ">$filename";
+	print LAST $1;
+	close LAST
+}
+
