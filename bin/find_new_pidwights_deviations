@@ -37,8 +37,16 @@ my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 ## Create a list of UWI's which have either no deviation survey or a two
 ## point deviation survey
 my %uwis;
-map {$uwis{$_} = 1} $proj->getUwisWithoutDeviations;
-map {$uwis{$_} = 1} $proj->getUwisWithTwoPoints;
+for ($proj->getUwisWithoutDeviations, $proj->getUwisWithTwoPoints) {
+	if (length $_ == 10) { 
+	  $uwis{$_ . "0000"} = $_
+	} elsif (length $_ == 12) {
+	  $uwis{$_ . "00"} = $_
+	} else {
+		$uwis{$_} = $_
+	};
+}
+print STDERR join("\n", sort keys %uwis), "\n";
 
 ## Open the PIDwights 297 format file
 my $input = PI297File->read($pi_file);
@@ -49,5 +57,17 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 ## Print any directional surveys for requested UWI's
 while (my $record = $input->nextRecord) {
 	next unless $uwis{$record->getUwi};
-	if ($_ = $record->getDirectionalSurvey) { $ask ? print OUTPUT : print }
+	if ($_ = $record->getDirectionalSurvey) {
+		my $long = $record->getUwi;
+		my $short = $uwis{$long};
+		if (length $uwis{$record->getUwi} == 10 && substr($record->getUwi, -4) == "0000") {
+			s/$long/$short/mg;
+			$ask ? print OUTPUT : print
+		} elsif (length $uwis{$record->getUwi} == 12 && substr($record->getUwi, -2) == "00") {
+		  s/$long/$short/mg;
+		  $ask ? print OUTPUT : print
+		} else {
+			$ask ? print OUTPUT : print
+		}
+	}
 }

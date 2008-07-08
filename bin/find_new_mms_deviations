@@ -20,7 +20,7 @@ my $usage_text =
 "  (req) Name of output file for MMS deviations\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 4 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
 my ($proj_name, $proj_pass, $lexco_file, $mms_file, $output_file);
@@ -40,8 +40,15 @@ my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 ## Create a list of UWI's which have either no deviation survey or a two
 ## point deviation survey
 my %uwis;
-map {$uwis{$_} = 1} $proj->getUwisWithoutDeviations;
-map {$uwis{$_} = 1} $proj->getUwisWithTwoPoints;
+for ($proj->getUwisWithoutDeviations, $proj->getUwisWithTwoPoints) {
+	if (length $_ == 10) { 
+	  $uwis{$_ . "0000"} = $_
+	} elsif (length $_ == 12) {
+	  $uwis{$_ . "00"} = $_
+	} else {
+		$uwis{$_} = $_
+	};
+}
 
 ## Open lexco_file for reading
 my $lexco = LexcoFile->read($lexco_file);
@@ -56,6 +63,8 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 while (my $lexco_record = $lexco->nextRecord) {
 	next unless $uwis{$lexco_record->getUwi};
 	if (my $mms_record = $mms->findByUwi($lexco_record->getUwi)) {
-		if ($_ = $mms_record->getDirectionalSurvey) { $ask ? print OUTPUT : print }
+		my $long = $lexco_record->getUwi;
+		my $short = $uwis{$long};
+		if (($_ = $mms_record->getDirectionalSurvey) =~ s/$long/$short/mg) { $ask ? print OUTPUT : print }
 	}
 }
