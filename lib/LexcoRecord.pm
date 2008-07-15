@@ -14,6 +14,14 @@ use constant MINOR_AXIS => 6356583;
 ##
 ## Public instance methods
 ##
+sub getBlockName {
+	my $self = shift;
+	return $self->{"block_name"} if exists $self->{"block_name"};
+	$self->{"block_name"} = substr($self->{"string"}, 360, 9);
+	$self->{"block_name"} =~ s/\s+//;
+	return $self->{"block_name"}
+}
+
 sub getBottomLatitude {
 	my $self = shift;
 	return $self->{"bottom_latitude"} if exists $self->{"bottom_latitude"};

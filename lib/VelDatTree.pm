@@ -32,6 +32,11 @@ sub getCheckshotByUwi {
 	return $text
 }
 
+sub getAllUwis {
+	my $self = shift;
+	return sort keys %{$self}
+}
+
 ##
 ## Private instance methods
 ##

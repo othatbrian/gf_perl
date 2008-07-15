@@ -1,0 +1,54 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use Helpers;
+use LexcoFile;
+use VelDatTree;
+
+## Provide usage information
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) Path to Velocity Data tree\n" .
+"  (req) Name of Lexco well export file (well.txt)\n" .
+"  (req) Output directory\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($veldat_path, $lexco_file, $dir);
+if ($ask) {
+	$veldat_path = prompt_with "Enter path to Velocity Data tree: ";
+	$lexco_file = prompt_with "Enter name of Lexco export file: ";
+	$dir = prompt_with "Enter name of directory for output files: "
+} else {
+	($veldat_path, $lexco_file, $dir) = @ARGV
+}
+
+## Parse the velocity data tree
+my $veldat = VelDatTree->new;
+$veldat->parse($veldat_path);
+
+## Get a list of UWIs
+my %uwis;
+map { $uwis{$_} = 1 } $veldat->getAllUwis;
+
+## Get the block for each UWI
+my $input = LexcoFile->read($lexco_file);
+while (my $record = $input->nextRecord) {
+	my $uwi = $record->getUwi;
+	$uwi .= "00" if length $uwi == 10;
+	$uwi .= "00" if length $uwi == 12;
+	next unless $uwis{$uwi};
+	$uwis{$uwi} = $record->getBlockName
+};
+
+  ## Produce output for requested UWI if data is available
+for my $uwi ($veldat->getAllUwis) {
+  open OUTPUT, ">${dir}/${uwi}.txt" or die "Could not open file \"${dir}/${uwi}.txt\"!\n";
+  print OUTPUT $veldat->getCheckshotByUwi($uwi, {"name" => $uwis{$uwi}});
+}
