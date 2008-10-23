@@ -148,6 +148,15 @@ sub getUwisWithoutDeviations {
 	@{$self->{"cache"}->{"getUwisWithoutDeviations"}} = keys %uwis
 }
 
+sub getUwisWithoutRealDeviations {
+	my $self = shift;
+	return @{$self->{"cache"}->{"getUwisWithoutRealDeviations"}} if $self->{"cache"}->{"getUwisWithoutRealDeviations"};
+	my %uwis;
+	map {$uwis{$_} = 1} $self->getAllUwis;
+	map {delete $uwis{$_}} $self->getUwisWithRealDeviations;
+	@{$self->{"cache"}->{"getUwisWithoutRealDeviations"}} = keys %uwis
+}
+
 ##
 ## Private class methods
 ##
