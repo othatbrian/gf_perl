@@ -35,7 +35,6 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 ## Print production data
 while (my $record = $input->nextRecord) {
 	if ($record->api) {
-		print STDERR "Outputting record\n";
 		$_ = join("\t", $record->api) . "\n";
 		$ask ? print OUTPUT : print
 	}

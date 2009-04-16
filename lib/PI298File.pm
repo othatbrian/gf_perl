@@ -19,11 +19,9 @@ sub nextRecord {
 		chomp;
 		## START_US_PROD means we're starting a new record
 		if (/^START_US_PROD\s+.*$/) {
-			print STDERR "Starting record\n";
 			$text = ""
 		## END_US_PROD means we've collected a record, so return it
 		} elsif (/^END_US_PROD\s+.*$/) {
-			print STDERR "Ending record\n";
 			return PI298Record->new($text)
 		## Otherwise we're still collecting a record
 		} else {
