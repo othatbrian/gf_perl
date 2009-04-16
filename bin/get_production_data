@@ -32,10 +32,14 @@ my $input = PI298File->read($pi_file);
 ## Open the output file if we're interactive
 if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
 
-## Print production data
+## Get the production data
+my %output;
 while (my $record = $input->nextRecord) {
-	if ($record->api) {
-		$_ = join("\t", $record->api) . "\n";
-		$ask ? print OUTPUT : print
-	}
+	$output{$record->api} = 1 if $record->api
+}
+
+## Print the output
+for (sort(keys %output)) {
+	$_ .= "\n";
+	$ask ? print OUTPUT : print;
 }
