@@ -5,45 +5,51 @@ use warnings;
 
 use Getopt::Long;
 use Helpers;
+use PI297File;
 use PI298File;
 
 ## Provide usage information
 my $usage_text =
 "Usage: $0 accepts these parameters:\n" .
 "  (opt) '-i' will interactively request all parameters\n" .
-"  (req) Name of PIDwights export file (*.98f)\n" .
+"  (req) Name of PIDwights 297 format export file (*.97f)\n" .
+"  (req) Name of PIDwights 298 format export file (*.98f)\n" .
 "  (req) Name of output file for production data\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 0 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 1 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
-my ($pi_file, $output_file);
+my ($pi297_file, $pi298_file, $output_file);
 if ($ask) {
-	$pi_file = prompt_with "Enter name of PIDwights export file: ";
+	$pi297_file = prompt_with "Enter name of PIDwights export file: ";
+	$pi298_file = prompt_with "Enter name of PIDwights export file: ";
 	$output_file = prompt_with "Enter name of output file for production data: "
 } else {
-	($pi_file) = @ARGV
+	($pi297_file, $pi298_file) = @ARGV
 }
 
 ## Open the PIDwights 298 format file
-my $input = PI298File->read($pi_file);
-
-## Open the output file if we're interactive
-if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
+my $input = PI298File->read($pi298_file);
 
 ## Get the production data
 my %output;
-my $records = 0;
-my $no_apis = 0;
 while (my $record = $input->nextRecord) {
-	++$records;
-	if ($record->api) {
-		$output{$record->api} = $record->cumulative_production
-	} else {
-		++$no_apis
+	$output{$record->api} = $record->cumulative_production if $record->api
+}
+
+## Open the PIDwights 298 format file
+$input = PI297File->read($pi297_file);
+
+## Get the depth and reserve data for any APIs for which we have production
+## data
+while (my $record = $input->nextRecord) {
+	if ($record->getUwi && exists $output{$record->getUwi}) {
+		unshift @{$output{$record->getUwi}}, $record->getMeasuredDepth
 	}
 }
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
 
 ## Print the output
 my $output;
