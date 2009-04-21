@@ -34,12 +34,20 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 
 ## Get the production data
 my %output;
+my $records = 0;
+my $no_apis = 0;
 while (my $record = $input->nextRecord) {
-	$output{$record->api} = 1 if $record->api
+	++$records;
+	if ($record->api) {
+		$output{$record->api} = $record->cumulative_production
+	} else {
+		++$no_apis
+	}
 }
 
 ## Print the output
+my $output;
 for (sort(keys %output)) {
-	$_ .= "\n";
-	$ask ? print OUTPUT : print;
+	$output = join("\t", $_, @{$output{$_}}) . "\n";
+	$ask ? print OUTPUT $output : print $output;
 }
