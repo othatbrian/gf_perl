@@ -72,7 +72,7 @@ sub getLongitude {
 sub getMeasuredDepth {
 	my $self = shift;
 	return $self->{"measured_depth"} if exists $self->{"measured_depth"};
-	$self->{"string"} =~ /^A.{64}(.{5})/m;
+	$self->{"string"} =~ /^A.{64}\s*?(\d{1,5})/m;
 	$self->{"measured_depth"} = $1;
 	$self->{"measured_depth"} =~ s/\s+// if $self->{"measured_depth"};
 	return $self->{"measured_depth"}
@@ -107,6 +107,14 @@ sub getTwoPointDirectionalSurvey {
 	my $text = $self->getUwi . ", 0, 0, 0\n";
 	$text .= join ", ", $self->getUwi, $self->getMeasuredDepth, ($long_bot-$long_top)*$feet_per_deg_long, ($lat_bot-$lat_top)*$feet_per_deg_lat;
 	return $text . "\n"
+}
+
+sub tvd {
+	my $self = shift;
+	return $self->{"tvd"} if exists $self->{"tvd"};
+	$self->{"string"} =~ /^S1.{5}\s*?(\d{1,5})/m;
+	$self->{"tvd"} = $1;
+	return $self->{"tvd"}
 }
 
 sub getUwi {
