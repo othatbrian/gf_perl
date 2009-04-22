@@ -22,8 +22,8 @@ unless ($#ARGV == 1 or $ask) { print STDERR $usage_text; exit 1 }
 ## If we're interactive, ask for everything; otherwise, grab what we're given
 my ($pi297_file, $pi298_file, $output_file);
 if ($ask) {
-	$pi297_file = prompt_with "Enter name of PIDwights export file: ";
-	$pi298_file = prompt_with "Enter name of PIDwights export file: ";
+	$pi297_file = prompt_with "Enter name of PIDwights 297 format export file: ";
+	$pi298_file = prompt_with "Enter name of PIDwights 298 format export file: ";
 	$output_file = prompt_with "Enter name of output file for production data: "
 } else {
 	($pi297_file, $pi298_file) = @ARGV
