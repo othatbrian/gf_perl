@@ -109,14 +109,6 @@ sub getTwoPointDirectionalSurvey {
 	return $text . "\n"
 }
 
-sub tvd {
-	my $self = shift;
-	return $self->{"tvd"} if exists $self->{"tvd"};
-	$self->{"string"} =~ /^S1.{5}\s*?(\d{1,5})/m;
-	$self->{"tvd"} = $1;
-	return $self->{"tvd"}
-}
-
 sub getUwi {
 	my $self = shift;
 	return $self->{"uwi"} if exists $self->{"uwi"};

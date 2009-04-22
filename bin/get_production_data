@@ -45,7 +45,7 @@ $input = PI297File->read($pi297_file);
 ## data
 while (my $record = $input->nextRecord) {
 	if ($record->getUwi && exists $output{$record->getUwi}) {
-		unshift @{$output{$record->getUwi}}, $record->getMeasuredDepth || '', $record->tvd || ''
+		unshift @{$output{$record->getUwi}}, $record->getMeasuredDepth || ''
 	}
 }
 ## Open the output file if we're interactive
@@ -54,7 +54,7 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 ## Print the output
 my $output;
 for (sort(keys %output)) {
-	unshift(@{$output{$_}}, '', '') if length(@{$output{$_}} == 3);
+	unshift(@{$output{$_}}, '') if length(@{$output{$_}} == 3);
 	$output = join("\t", $_, @{$output{$_}}) . "\n";
 	$ask ? print OUTPUT $output : print $output;
 }
