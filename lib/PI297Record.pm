@@ -73,7 +73,7 @@ sub getMeasuredDepth {
 	my $self = shift;
 	return $self->{"measured_depth"} if exists $self->{"measured_depth"};
 	$self->{"string"} =~ /^A.{64}(.{5})/m;
-	($self->{"measured_depth"} = $1) =~ s/\s+//;
+	$self->{"measured_depth"} = $1;
 	$self->{"measured_depth"} =~ s/\s+// if $self->{"measured_depth"};
 	return $self->{"measured_depth"}
 }
