@@ -157,6 +157,18 @@ sub getUwisWithoutRealDeviations {
 	@{$self->{"cache"}->{"getUwisWithoutRealDeviations"}} = keys %uwis
 }
 
+sub surveys {
+	my $self = shift;
+	return $self->{"cache"}=>{"surveys"} if $self->{"cache"}->{"surveys"};
+	my %surveys;
+	my $sql = "select name from survey_3d_area";
+	map {$surveys{$_->[0]} = "3D"} @{$_dbh->selectall_arrayref($sql, {})};
+	$sql = "select name from seis_2d_survey";
+	map {$surveys{$_->[0]} = "2D"} @{$_dbh->selectall_arrayref($sql, {})};
+	%{$self->{"cache"}->{"surveys"}} = %surveys;
+	return $self->{"cache"}->{"surveys"}
+}
+
 ##
 ## Private class methods
 ##

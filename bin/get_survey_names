@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use GFProject;
+use Helpers;
+
+## Provide usage information
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) Name of GeoFrame project to query\n" .
+"  (req) Password of GeoFrame project to query\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 1 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($proj_name, $proj_pass);
+if ($ask) {
+	$proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+	$proj_pass = prompt_with "Enter password of GeoFrame project to query: "
+} else {
+	($proj_name, $proj_pass) = @ARGV
+}
+
+## Connect to the project
+my $proj = GFProject->connect($proj_name, $proj_pass) or die "Could not connect to GeoFrame project\n";
+
+## Print a list of surveys and whether they're 2D or 3D
+my %surveys = %{$proj->surveys};
+map print("$_\t$surveys{$_}\n"), sort keys %surveys;
