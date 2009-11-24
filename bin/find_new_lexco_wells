@@ -12,16 +12,16 @@ use POSIX qw/strftime/;
 
 ## Provide for conversion between Lexco's well status codes and GeoFrame's 
 my %well_codes = (
-	"COM" => 1,
-	"DRL" => 1,
-	"GS" => 17,
-	"OGS" => 17,
-	"OS" => 17,
+	"COM" => 4,
+	"DRL" => 14,
+	"GS" => 33,
+	"OGS" => 507,
+	"OS" => 60,
 	"CNL" => 26,
 	"DRY" => 26,
-	"GX" => 26,
-	"OGX" => 26,
-	"OX" => 26,
+	"GX" => 34,
+	"OGX" => 56,
+	"OX" => 51,
 	"GP" => 30,
 	"OP" => 48,
 	"OGP" => 50
