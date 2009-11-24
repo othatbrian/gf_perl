@@ -43,6 +43,12 @@ sub getAllUwis {
 	return @{$self->{"cache"}->{"getAllUwis"}}
 }
 
+sub getBoreholeNameByUwi {
+	my $self = shift;
+	my $sql = "select name from borehole where uwi = ?";
+	return $_dbh->selectrow_array($sql, {}, shift)
+}
+
 sub getCheckshotsByUwi {
 	my $self = shift;
 	my $sql = "select w.id from well_check_shot_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and b.uwi = ?";

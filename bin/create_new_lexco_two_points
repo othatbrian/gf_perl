@@ -18,7 +18,7 @@ my $usage_text =
 "  (req) Name of output file for two point deviations\n";
 my $ask;
 GetOptions("i" => \$ask);
-unless ($#ARGV == 3 or $ask) { print STDERR $usage_text; exit 1 }
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
 
 ## If we're interactive, ask for everything; otherwise, grab what we're given
 my ($proj_name, $proj_pass, $lexco_file, $output_file);

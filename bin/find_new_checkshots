@@ -47,5 +47,5 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 
 ## Print any checkshot surveys for requested UWI's
 for my $uwi (sort keys %uwis) {
-	if ($_ = $veldat->getCheckshotByUwi($uwi, {"name" => "VelDat"})) { $ask ? print OUTPUT : print }
+	if ($_ = $veldat->getCheckshotByUwi($uwi, {"name" => "VelDat_" . $proj->getBoreholeNameByUwi($uwi)})) { $ask ? print OUTPUT : print }
 }
