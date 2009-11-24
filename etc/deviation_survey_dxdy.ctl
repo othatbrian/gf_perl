@@ -1,10 +1,10 @@
-gal_GeneralInfo GenInfo_22976 (
-    AbsentValue = "-999.25",
+gal_GeneralInfo GenInfo_853359191 (
+    AbsentValue = "",
     Comment = "",
     RecordLength = 256,
     StringDelimiter  = ",",
     StartRow = 1,
-    GFVersionNumber = "3.5",
+    GFVersionNumber = "4.4",
   );
 
 gal_SelectDI BH (
@@ -52,7 +52,7 @@ gal_CreateString NextBoreholeUWI (
     ContinueTest = 1
 );
 
-gal_CreateWellDeviation WellDeviationData_22976 (
+gal_CreateWellDeviation WellDeviationData_853359191 (
     EndOfData = 0,
     AzimRef = "GRID",
     MagneticDecl = 0,
@@ -65,25 +65,23 @@ gal_CreateWellDeviation WellDeviationData_22976 (
         gal_Number(,,",","%g"),
         gal_Number(,,",","%g"),
         gal_Number(,,",","%g"),
-        gal_Number(,,",","%g"),
     },
     ArrayCodes = {
-        "",
         "MD",
-        "DEVI",
-        "AZIM",
+        "DX",
+        "DY",
         "",
     },
     ArrayUnits = {
-        "",
         "ft",
-        "deg",
-        "deg",
+        "ft",
+        "ft",
         "",
     },
     ArrayFields = {
-        3,
-        2,
         1,
+        2,
+        3,
+        -1,
     },
 );

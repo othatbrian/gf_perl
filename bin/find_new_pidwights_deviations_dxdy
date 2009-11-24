@@ -57,7 +57,7 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 ## Print any directional surveys for requested UWI's
 while (my $record = $input->nextRecord) {
 	next unless $uwis{$record->getUwi};
-	if ($_ = $record->getDirectionalSurvey) {
+	if ($_ = $record->getDirectionalSurveyWithDxDy) {
 		my $long = $record->getUwi;
 		my $short = $uwis{$long};
 		if (length $uwis{$record->getUwi} == 10 && substr($record->getUwi, -4) == "0000") {

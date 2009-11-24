@@ -14,18 +14,42 @@ use constant MINOR_AXIS => 6356583;
 ##
 ## Public instance methods
 ##
-sub getDirectionalSurvey {
+sub getDirectionalSurveyWithDevAz {
 	my $self = shift;
-	return $self->{"directional_survey"} if exists $self->{"directional_survey"};
+	return $self->{"directional_survey_devaz"} if exists $self->{"directional_survey_devaz"};
 	my $text = "";
 	my ($md, $dev, $az);
 	for (split "\n", $self->{"string"}) {
 		next unless /^U2...(.{5}).{8}(.{6})(.{6})/;
 		($md, $dev, $az) = ($1, $2, $3);
 		map {$_ =~ s/\s+//} $md, $dev, $az;
+		next unless $dev && $az;
 		$text .= $self->getUwi . ", 0, 0, 0\n" if ($text eq "" and $md != 0);
 		$text .= $self->getUwi . ", $md, $dev, $az\n"
 	}
+	$self->{"directional_survey_devaz"} = $text;
+	return $text
+}
+
+sub getDirectionalSurveyWithDxDy {
+	my $self = shift;
+	return $self->{"directional_survey_dxdy"} if exists $self->{"directional_survey_dxdy"};
+	my $text = "";
+	my ($md, $dx, $dy);
+	for (split "\n", $self->{"string"}) {
+		next unless /^U2...(.{5}).{20}(.{9})(.{9})/;
+		($md, $dy, $dx) = ($1, $2, $3);
+		map {$_ =~ s/\s+//} $md, $dx, $y;
+		if (chop($dx) eq "W") {
+			$dx = sprintf("%.2f", 0.0 - $dx)
+		}
+		if (chop($dy) eq "S") {
+			$dy = sprintf("%.2f", 0.0 - $dy)
+		}
+		$text .= $self->getUwi . ", 0, 0, 0\n" if ($text eq "" and $md != 0);
+		$text .= $self->getUwi . ", $md, $dx, $dy\n"
+	}
+	$self->{"directional_survey_dxdy"} = $text;
 	return $text
 }
 
