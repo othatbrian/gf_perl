@@ -39,7 +39,7 @@ sub getDirectionalSurveyWithDxDy {
 	for (split "\n", $self->{"string"}) {
 		next unless /^U2...(.{5}).{20}(.{9})(.{9})/;
 		($md, $dy, $dx) = ($1, $2, $3);
-		map {$_ =~ s/\s+//} $md, $dx, $y;
+		map {$_ =~ s/\s+//} $md, $dx, $dy;
 		if (chop($dx) eq "W") {
 			$dx = sprintf("%.2f", 0.0 - $dx)
 		}

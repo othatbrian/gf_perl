@@ -37,7 +37,7 @@ my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 ## Create a list of UWI's which have either no deviation survey or a two
 ## point deviation survey
 my %uwis;
-for ($proj->getUwisWithoutDeviations, $proj->getUwisWithTwoPoints) {
+for ($proj->getUwisWithoutRealDeviations) {
 	if (length $_ == 10) { 
 	  $uwis{$_ . "0000"} = $_
 	} elsif (length $_ == 12) {
@@ -46,7 +46,6 @@ for ($proj->getUwisWithoutDeviations, $proj->getUwisWithTwoPoints) {
 		$uwis{$_} = $_
 	};
 }
-print STDERR join("\n", sort keys %uwis), "\n";
 
 ## Open the PIDwights 297 format file
 my $input = PI297File->read($pi_file);
