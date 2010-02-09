@@ -20,8 +20,8 @@ $text =~ /Directional Survey \(Points\)<\/a>\r\n<\/td>\r\n<td width=\"100\" alig
 die "The page at\n  ${url}\nhas changed format.  Please modify this script appropriately.\n" unless $1;
 unless ($1 eq $latest) {
 	getstore("http://www.gomr.mms.gov/homepg/pubinfo/freeasci/well/zipped/delimit/DSPTSF.ZIP", "DSPTSF.ZIP") or die "Could not retrieve $url\n";
-	system "unzip DSPTSF.ZIP";
-	system 'mv DSPTSFfd.txt DSPTSFfd_`date "+%Y%m%d"`.txt';
+	system "unzip -d /tmp DSPTSF.ZIP";
+	system 'mv /tmp/DSPTSFfd.txt DSPTSFfd_`date "+%Y%m%d"`.txt';
 	open LAST, ">$filename";
 	print LAST $1;
 	close LAST
