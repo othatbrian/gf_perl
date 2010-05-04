@@ -1,0 +1,78 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Getopt::Long;
+use GFProject;
+use Helpers;
+use PI298File;
+
+## Provide usage information
+my $usage_text =
+"Usage: $0 accepts these parameters:\n" .
+"  (opt) '-i' will interactively request all parameters\n" .
+"  (req) GeoFrame project name\n" .
+"  (req) GeoFrame project password\n" .
+"  (req) Name of PIDwights export file (*.98f)\n" .
+"  (req) Name of output file for PIDwights perfs\n";
+my $ask;
+GetOptions("i" => \$ask);
+unless ($#ARGV == 2 or $ask) { print STDERR $usage_text; exit 1 }
+
+## If we're interactive, ask for everything; otherwise, grab what we're given
+my ($proj_name, $proj_pass, $pi_file, $output_file);
+if ($ask) {
+  $proj_name = prompt_with "Enter name of GeoFrame project to query: ";
+  $proj_pass = prompt_with "Enter password of GeoFrame project to query: ";
+  $pi_file = prompt_with "Enter name of PIDwights export file: ";
+  $output_file = prompt_with "Enter name of output file for PIDwights perfs: "
+} else {
+  ($proj_name, $proj_pass, $pi_file) = @ARGV
+}
+
+## Connect to the project
+my $proj = GFProject->connect($proj_name, $proj_pass) or die;
+
+## Get a list of all UWI's in the project
+## and hash it for quicker access
+my %proj_uwis;
+for ($proj->getAllUwis) {
+  $proj_uwis{$_} = 1
+}
+
+## Get a list of all Perforation in the project
+## and hash it for quicker access
+my %proj_perfs = ();
+map { $proj_perfs{$_->[0]} = $_->[1] } @{$proj->getPerforations};
+
+## Open the PIDwights 298 format file
+my $input = PI298File->read($pi_file);
+
+## Open the output file if we're interactive
+if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_file\"!\n" }
+
+## Print any perf data not already in the project
+while (my $record = $input->nextRecord) {
+  my $uwi = $record->getUwi;
+  next unless $uwi && $proj_uwis{$uwi};
+  if ($record->getPerforation) {
+    my @perf = @{$record->getPerforation};
+    my $string = $uwi . " ";
+    $string .= $perf[0] ? $perf[0] : $perf[1];
+    $string .= " PF_pidwights\n";
+    if ($proj_perfs{$uwi}) {
+      if ( $perf[0] == $proj_perfs{$uwi}
+        || $perf[1] == $proj_perfs{$uwi}
+        || $perf[0] && $perf[1]
+        && $perf[0] < $proj_perfs{$uwi}
+        && $proj_perfs{$uwi} < $perf[1]) {
+        next
+      } else {
+        $ask ? print OUTPUT $string : print $string
+      }
+    } else {
+      $ask ? print OUTPUT $string : print $string
+    }
+  }
+}

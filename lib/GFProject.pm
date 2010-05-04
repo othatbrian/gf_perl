@@ -91,6 +91,14 @@ sub getMarkersByUwi {
 	return @_
 }
 
+sub getPerforations {
+	my $self = shift;
+	my $prefix = shift;
+	my $sql = "select b.uwi, w.value from well_marker w, borehole b where w.container_id = b.id";
+	$sql .= " and name like '$prefix'" if ($prefix);
+	$_dbh->selectall_arrayref($sql)
+}
+
 sub getTwoPointsByUwi {
 	my $self = shift;
 	my $sql = "select w.id from well_deviation_survey w, borehole b where w.container_id = b.id and w.container_table = 'Borehole' and b.uwi = ? and w.source = 'two_points'";
