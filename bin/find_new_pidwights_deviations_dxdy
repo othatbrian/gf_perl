@@ -55,6 +55,12 @@ if ($ask) { open OUTPUT, ">$output_file" or die "Could not open file \" $output_
 
 ## Print any directional surveys for requested UWI's
 while (my $record = $input->nextRecord) {
+	## Some entries seem to be missing UWI's; skip them
+	unless ($record->getUwi) {
+		print STDERR "Warning: discarding ", $record->getWellName, " as it has no UWI\n";
+		next
+	}
+
 	next unless $uwis{$record->getUwi};
 	if ($_ = $record->getDirectionalSurveyWithDxDy) {
 		my $long = $record->getUwi;

@@ -57,7 +57,7 @@ my $proj = GFProject->connect($proj_name, $proj_pass) or die;
 
 ## Get a list of all UWI's currently in the project
 my %uwis_in_project;
-map { $uwis_in_project{$_} = 1 } $proj->getAllUwis;
+map { $uwis_in_project{$_} = 1 if $_ } $proj->getAllUwis;
 
 ## Open the output file if we're interactive
 if ($ask) { open OUTPUT, ">$output_file" or die }
@@ -68,6 +68,12 @@ my $included = my $total = 0;
 my ($record, $date, $day, $month, $year);
 while ($record = $input->nextRecord) {
 	$total++;
+	## Some entries seem to be missing UWI's; skip them
+	unless ($record->getUwi) {
+		print STDERR "Warning: discarding ", $record->getWellName, " as it has no UWI\n";
+		next
+	}
+
 	## If this UWI already exists in the project
 	## or if a comparable 12 digit UWI already exists in the project
 	## or if a comparable 10 digit UWI already exists in the project
