@@ -16,7 +16,7 @@ if (open LAST, "$filename") {
 
 my $url = "http://www.gomr.boemre.gov/homepg/pubinfo/freeasci/well/freewell.html";
 my $text = get $url or die "Could not retrieve $url\n";
-$text =~ /Directional Survey \(Points\)<\/a>\r\n<\/font>\r\n<\/td>\r\n<td width=\"100\" align=\"center\"><font face=\"Arial\">(..-..-.... ..:..:..) ..\&nbsp\;/m;
+$text =~ /Directional Survey \(Points\)<\/a>\r\n<\/font>\r\n<\/td>\r\n<td align=\"center\"><font face=\"Arial\">(..-..-.... ..:..:..) ..\&nbsp\;/m;
 die "The page at\n  ${url}\nhas changed format.  Please modify this script appropriately.\n" unless $1;
 unless ($1 eq $latest) {
 	getstore("http://www.gomr.mms.gov/homepg/pubinfo/freeasci/well/zipped/delimit/DSPTSF.ZIP", "DSPTSF.ZIP") or die "Could not retrieve $url\n";
