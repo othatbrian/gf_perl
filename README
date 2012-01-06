@@ -21,6 +21,6 @@ performing tens of thousands of Oracle queries.
   application talks to its Oracle database, and I was then able to gleen all
   the information we needed regarding wells in the project
   * Anything that took longer than several (or maybe a few tens) of seconds was
-    not acceptable to me, and on several occasions I was able to change an
-    implementation and cut runtime[s] by an order of magnitude
+  not acceptable to me, and on several occasions I was able to change an
+  implementation and cut runtime[s] by an order of magnitude
 
